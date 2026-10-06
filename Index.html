@@ -1,1014 +1,822 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
   <base target="_top">
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>新北市卡介苗工作人員管理系統</title>
   <style>
     :root {
-      --primary-gradient: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-      --btn-solid-color: #2563eb; 
-      --secondary-color: #64748b;
-      --accent-color: #0f172a;
+      color-scheme: light;
+      --ink: #172b3a;
+      --muted: #718292;
+      --line: #e5edf1;
+      --canvas: #f3f7f8;
+      --paper: #fff;
+      --teal: #087e83;
+      --teal-dark: #06686d;
+      --teal-light: #e5f5f3;
+      --gold: #d5963d;
+      --red: #c75353;
+      --shadow: 0 18px 50px rgba(30, 65, 75, .09);
     }
 
-    /* 全螢幕鎖定 */
-    html, body {
-      height: 100%;
+    * { box-sizing: border-box; }
+    body {
       margin: 0;
-      overflow: hidden; 
+      min-height: 100vh;
+      background: var(--canvas);
+      color: var(--ink);
+      font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
     }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: wait; opacity: .65; }
+    .hidden { display: none !important; }
 
-    body { 
-      font-family: 'Noto Sans TC', sans-serif; 
-      background-color: #f8fafc;
-      background-image: 
-        radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(37, 99, 235, 0.1) 0px, transparent 50%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      color: #1e293b;
+    .login-screen {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) minmax(360px, 510px);
+      background: #f7fbfa;
+    }
+    .login-intro {
       position: relative;
-    }
-
-    /* 背景裝飾圓球 */
-    body::before {
-      content: "";
-      position: absolute;
-      width: 400px;
-      height: 400px;
-      background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(29, 78, 216, 0.05));
-      border-radius: 50%;
-      top: -100px;
-      right: -100px;
-      z-index: -1;
-      filter: blur(50px);
-      animation: float 20s infinite alternate;
-    }
-
-    @keyframes float {
-      from { transform: translate(0, 0); }
-      to { transform: translate(-100px, 100px); }
-    }
-
-    /* 主要容器 */
-    .container-wrapper {
-      width: 100%;
-      max-width: 650px;
-      height: 90vh; 
-      z-index: 10;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       overflow: hidden;
-    }
-
-    .has-edit-active .container-wrapper {
-      max-width: 95%; 
-      transition: max-width 0.5s ease-in-out;
-    }
-
-    /* 切換層級 */
-    .view-layer {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 100%;
-      transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-    }
-
-    .view-layer.active {
-      opacity: 1;
-      visibility: visible;
-      transform: translate(-50%, -50%);
-      pointer-events: auto;
-    }
-
-    .view-layer.exit-up {
-      opacity: 0;
-      visibility: hidden;
-      transform: translate(-50%, -150%);
-    }
-
-    .view-layer.entry-down {
-      opacity: 0;
-      visibility: hidden;
-      transform: translate(-50%, 50%);
-    }
-
-    /* 卡片設計 */
-    .search-card {
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-radius: 32px;
-      padding: 48px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.6);
-    }
-
-    .main-title {
-      font-weight: 700;
-      letter-spacing: -1px;
-      background: linear-gradient(135deg, #0f172a 30%, #2563eb 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 40px;
-      font-size: 1.75rem;
-      line-height: 1.4;
-    }
-
-    .form-label {
-      font-weight: 500;
-      margin-left: 6px;
-      color: #334155;
-      font-size: 0.95rem;
-    }
-
-    .form-control {
-      border-radius: 16px;
-      padding: 14px 20px;
-      border: 1.5px solid #e2e8f0;
-      background: rgba(255, 255, 255, 0.8);
-      transition: all 0.25s ease;
-    }
-
-    .form-control:focus {
-      border-color: #2563eb;
-      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
-      background: white;
-      outline: none;
-    }
-
-    /* 主要查詢按鈕 */
-    .btn-search {
-      background-color: var(--btn-solid-color);
-      color: white;
-      border: none;
-      border-radius: 16px;
-      padding: 16px;
-      font-weight: 700;
-      font-size: 1.15rem;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      margin-top: 15px;
-      cursor: pointer;
-      box-shadow: 0 8px 20px -6px rgba(37, 99, 235, 0.3);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
-      width: 100%;
-    }
-
-    .btn-search:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 25px -8px rgba(37, 99, 235, 0.4);
-      background-color: #3b82f6;
-    }
-
-    /* 重新設計的編輯按鈕 */
-    .btn-edit-portal {
-      background-color: #ffffff;
-      color: #1e293b;
-      border: 2px solid #e2e8f0;
-      border-radius: 16px;
-      padding: 12px;
-      font-weight: 600;
-      font-size: 0.95rem;
-      transition: all 0.3s ease;
-      margin-top: 16px;
-      cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-      width: 100%;
-    }
-
-    .btn-edit-portal:hover {
-      background-color: #f1f5f9;
-      border-color: #2563eb;
-      color: #2563eb;
-      transform: translateY(-2px);
-    }
-
-    /* 資料說明連結 */
-    .info-link-container {
-      text-align: center;
-      margin-top: 16px;
-    }
-
-    .info-link {
-      color: #64748b;
-      text-decoration: none;
-      font-size: 0.85rem;
-      font-weight: 500;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      transition: color 0.2s;
-    }
-
-    .info-link:hover {
-      color: #2563eb;
-      text-decoration: underline;
-    }
-
-    /* 結果與編輯層級樣式 */
-    .result-card {
-      background: white;
-      border-radius: 28px;
-      overflow: hidden;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
       display: flex;
       flex-direction: column;
-      max-height: 85vh; 
-    }
-
-    .result-header {
-      background: #0f172a;
-      color: white;
-      padding: 24px 30px;
-      font-weight: 700;
-      font-size: 1.1rem;
-      flex-shrink: 0;
-    }
-
-    .info-grid {
-      overflow-y: auto;
-      flex-grow: 1;
-    }
-
-    .info-item {
-      display: flex;
       justify-content: space-between;
-      align-items: center;
-      padding: 18px 32px;
-      border-bottom: 1px solid #f1f5f9;
+      padding: clamp(34px, 6vw, 86px);
+      color: #fff;
+      background:
+        radial-gradient(circle at 84% 18%, rgba(255,255,255,.18), transparent 22%),
+        radial-gradient(circle at 14% 84%, rgba(85,201,184,.22), transparent 31%),
+        linear-gradient(145deg, #075d65, #087f82 62%, #2a9c91);
     }
-
-    .loader-container {
-      display: none;
-      margin-top: 25px;
+    .login-intro::after {
+      position: absolute;
+      right: -150px;
+      bottom: -240px;
+      width: 550px;
+      height: 550px;
+      content: "";
+      border: 1px solid rgba(255,255,255,.17);
+      border-radius: 50%;
+      box-shadow: 0 0 0 54px rgba(255,255,255,.035), 0 0 0 110px rgba(255,255,255,.025);
     }
-
-    .btn-back {
-      margin: 15px auto 25px auto;
-      display: block;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      padding: 10px 24px;
-      border-radius: 50px;
-      color: #64748b;
-      font-size: 0.9rem;
-      transition: all 0.3s;
-      cursor: pointer;
+    .intro-brand, .intro-copy, .intro-foot { position: relative; z-index: 1; }
+    .intro-brand { display: flex; align-items: center; gap: 13px; font-weight: 700; letter-spacing: .04em; }
+    .brand-symbol {
+      display: grid;
+      width: 44px;
+      height: 44px;
+      place-items: center;
+      border: 1px solid rgba(255,255,255,.34);
+      border-radius: 14px;
+      background: rgba(255,255,255,.12);
+      font-size: 22px;
     }
-
-    .btn-back:hover {
-      background: #f1f5f9;
-      color: #2563eb;
-      border-color: #2563eb;
+    .intro-copy { max-width: 570px; margin: 70px 0; }
+    .intro-eyebrow { color: #bcebe2; font-size: 12px; font-weight: 700; letter-spacing: .18em; }
+    .intro-copy h1 { margin: 18px 0; font-size: clamp(32px, 4vw, 55px); line-height: 1.38; letter-spacing: .02em; }
+    .intro-copy p { max-width: 430px; margin: 0; color: rgba(255,255,255,.8); font-size: 15px; line-height: 1.9; }
+    .intro-foot { color: rgba(255,255,255,.65); font-size: 12px; }
+    .login-side { display: grid; place-items: center; padding: 34px; }
+    .login-card { width: min(100%, 390px); }
+    .login-card h2 { margin: 0 0 8px; font-size: 27px; }
+    .login-card .subtext { margin: 0 0 32px; color: var(--muted); font-size: 14px; line-height: 1.7; }
+    .field { display: grid; gap: 8px; margin: 18px 0; }
+    .field label { color: #425968; font-size: 13px; font-weight: 700; }
+    .field input, .field select {
+      width: 100%;
+      height: 49px;
+      padding: 0 14px;
+      border: 1px solid #d9e4e8;
+      border-radius: 10px;
+      outline: 0;
+      background: #fff;
+      color: var(--ink);
+      transition: border .18s, box-shadow .18s;
     }
+    .field input:focus, .field select:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(8,126,131,.12); }
+    .primary-button {
+      min-height: 48px;
+      padding: 0 19px;
+      border: 0;
+      border-radius: 10px;
+      background: var(--teal);
+      color: #fff;
+      font-weight: 700;
+      transition: background .18s, transform .18s;
+    }
+    .primary-button:hover { background: var(--teal-dark); transform: translateY(-1px); }
+    .login-submit { width: 100%; margin-top: 10px; }
+    .login-message { min-height: 24px; margin: 16px 0 0; color: var(--red); font-size: 13px; }
+    .login-note { margin-top: 26px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; line-height: 1.8; }
 
-    .edit-table thead {
+    .app-shell { min-height: 100vh; }
+    .topbar {
       position: sticky;
+      z-index: 5;
       top: 0;
-      z-index: 100;
+      display: flex;
+      height: 72px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 0 34px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,.94);
+      backdrop-filter: blur(12px);
     }
+    .topbar-brand { display: flex; align-items: center; gap: 12px; color: var(--teal-dark); font-weight: 800; }
+    .topbar-brand .brand-symbol { width: 38px; height: 38px; border: 0; background: var(--teal-light); font-size: 20px; }
+    .topbar-right { display: flex; align-items: center; gap: 18px; }
+    .role-tag { padding: 6px 10px; border-radius: 999px; background: var(--teal-light); color: var(--teal-dark); font-size: 12px; font-weight: 700; }
+    .user-chip { display: flex; align-items: center; gap: 10px; }
+    .avatar { display: grid; width: 37px; height: 37px; place-items: center; border-radius: 50%; background: #d9eeeb; color: var(--teal-dark); font-weight: 800; }
+    .user-chip-name { font-size: 13px; font-weight: 700; }
+    .user-chip-unit { margin-top: 2px; color: var(--muted); font-size: 11px; }
+    .text-button { padding: 8px 10px; border: 0; background: transparent; color: var(--muted); font-size: 13px; }
+    .text-button:hover { color: var(--teal-dark); }
+    .workspace { display: grid; width: 100%; min-height: calc(100vh - 72px); grid-template-columns: 260px minmax(0, 1fr); }
+    .sidebar { padding: 32px 20px; border-right: 1px solid var(--line); background: #fff; }
+    .side-caption { margin: 0 12px 14px; color: #9aa9b3; font-size: 12px; font-weight: 800; letter-spacing: .13em; }
+    .nav-list { display: grid; gap: 6px; }
+    .nav-button {
+      display: flex;
+      width: 100%;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 12px;
+      border: 0;
+      border-radius: 9px;
+      background: transparent;
+      color: #5c7180;
+      text-align: left;
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .nav-button:hover { background: #f3f8f8; color: var(--teal-dark); }
+    .nav-button.active { background: var(--teal-light); color: var(--teal-dark); font-weight: 800; }
+    .nav-icon { width: 24px; text-align: center; font-size: 19px; }
+    .side-help { margin: 36px 8px 0; padding: 18px; border: 1px solid var(--line); border-radius: 12px; background: #fbfdfd; }
+    .side-help strong { display: block; margin-bottom: 8px; font-size: 14px; }
+    .side-help p { margin: 0 0 14px; color: var(--muted); font-size: 13px; line-height: 1.8; }
+    .side-help a { color: var(--teal); font-size: 13px; font-weight: 700; text-decoration: none; }
+    .main-content { min-width: 0; padding: 40px clamp(24px, 4vw, 64px) 64px; }
+    .page-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 30px; }
+    .eyebrow { margin-bottom: 9px; color: var(--teal); font-size: 13px; font-weight: 800; letter-spacing: .13em; }
+    .page-heading h1 { margin: 0; font-size: clamp(28px, 2.7vw, 36px); letter-spacing: .01em; }
+    .page-heading p { margin: 9px 0 0; color: var(--muted); font-size: 15px; }
+    .heading-actions { display: flex; flex-wrap: wrap; gap: 9px; }
+    .outline-button {
+      min-height: 40px;
+      padding: 0 13px;
+      border: 1px solid #d6e3e6;
+      border-radius: 9px;
+      background: #fff;
+      color: #48606d;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .outline-button:hover { border-color: var(--teal); color: var(--teal-dark); }
+    .stats-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-bottom: 27px; }
+    .stat-card { display: flex; min-height: 118px; align-items: center; gap: 17px; padding: 21px; border: 1px solid var(--line); border-radius: 13px; background: var(--paper); box-shadow: 0 5px 18px rgba(36,68,76,.025); }
+    .stat-icon { display: grid; width: 48px; height: 48px; flex: 0 0 48px; place-items: center; border-radius: 12px; background: #e9f5f4; color: var(--teal); font-size: 22px; }
+    .stat-icon.gold { background: #fff5e7; color: #bd812d; }
+    .stat-icon.blue { background: #edf3fb; color: #557eae; }
+    .stat-label { color: var(--muted); font-size: 13px; }
+    .stat-value { margin-top: 5px; font-size: 29px; font-weight: 800; line-height: 1.15; }
+    .panel { overflow: hidden; border: 1px solid var(--line); border-radius: 13px; background: #fff; box-shadow: 0 5px 18px rgba(36,68,76,.025); }
+    .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 22px 24px; border-bottom: 1px solid var(--line); }
+    .panel-head h2 { margin: 0; font-size: 18px; }
+    .panel-head p { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
+    .table-tools { display: flex; align-items: center; gap: 9px; }
+    .search-input { width: min(320px, 35vw); height: 43px; padding: 0 14px; border: 1px solid #dce6e9; border-radius: 8px; outline: 0; font-size: 14px; }
+    .search-input:focus { border-color: var(--teal); }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+    th { padding: 15px 20px; background: #f7fafb; color: #7c8d99; text-align: left; font-size: 12px; font-weight: 800; letter-spacing: .04em; }
+    td { padding: 17px 20px; border-top: 1px solid #edf2f4; color: #425968; font-size: 14px; }
+    tbody tr:hover { background: #fbfdfd; }
+    .person-cell { display: flex; align-items: center; gap: 10px; }
+    .person-initial { display: grid; width: 32px; height: 32px; place-items: center; border-radius: 50%; background: #e8f3f2; color: var(--teal-dark); font-weight: 800; }
+    .person-name { color: var(--ink); font-weight: 800; }
+    .person-unit { margin-top: 4px; color: var(--muted); font-size: 12px; }
+    .status { display: inline-flex; padding: 6px 10px; border-radius: 999px; background: #eaf6ef; color: #38865b; font-size: 12px; font-weight: 800; }
+    .status.inactive { background: #fff0ef; color: #bd5550; }
+    .row-actions { display: flex; gap: 7px; }
+    .small-action { padding: 8px 11px; border: 1px solid #dce9e9; border-radius: 7px; background: #fff; color: var(--teal-dark); font-size: 12px; font-weight: 700; }
+    .small-action:hover { background: var(--teal-light); }
+    .empty-state { padding: 44px 18px; color: var(--muted); text-align: center; font-size: 13px; }
+    .loading-line { padding: 18px; color: var(--muted); text-align: center; font-size: 12px; }
+    .notice { margin-bottom: 18px; padding: 13px 15px; border: 1px solid #d9ebea; border-radius: 10px; background: #f1f9f8; color: #3e6870; font-size: 12px; line-height: 1.7; }
+    .annual-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
+    .annual-card { padding: 18px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+    .annual-card h3 { margin: 0 0 14px; color: var(--teal-dark); font-size: 14px; }
+    .annual-row { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid #edf2f4; font-size: 12px; }
+    .annual-row span:first-child { color: var(--muted); }
+    .annual-row span:last-child { text-align: right; font-weight: 700; }
+    .modal-backdrop { position: fixed; z-index: 20; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(18,39,49,.48); }
+    .modal { width: min(100%, 720px); max-height: min(90vh, 850px); overflow: auto; border-radius: 15px; background: #fff; box-shadow: 0 25px 80px rgba(0,0,0,.2); }
+    .modal-head { position: sticky; z-index: 1; top: 0; display: flex; align-items: center; justify-content: space-between; padding: 18px 21px; border-bottom: 1px solid var(--line); background: #fff; }
+    .modal-head h2 { margin: 0; font-size: 16px; }
+    .close-button { width: 34px; height: 34px; border: 0; border-radius: 50%; background: #f2f6f7; color: #586c77; font-size: 20px; }
+    .modal-body { padding: 20px; }
+    .detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 20px; }
+    .detail-item { padding: 12px 0; border-bottom: 1px solid #edf2f4; }
+    .detail-label { color: var(--muted); font-size: 10px; }
+    .detail-value { margin-top: 5px; font-size: 13px; font-weight: 700; overflow-wrap: anywhere; }
+    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
+    .form-grid .field { margin: 9px 0; }
+    .form-grid .field input, .form-grid .field select { height: 43px; }
+    .modal-foot { display: flex; justify-content: flex-end; gap: 9px; padding: 15px 20px; border-top: 1px solid var(--line); }
+    .danger-text { color: var(--red); }
+    .toast { position: fixed; z-index: 30; right: 22px; bottom: 22px; max-width: min(440px, calc(100vw - 44px)); padding: 13px 17px; border-radius: 10px; background: #173a42; color: #fff; box-shadow: var(--shadow); font-size: 12px; }
 
-    .edit-table th {
-      white-space: nowrap;
-      background-color: #f1f5f9 !important;
-      color: #475569;
-      font-size: 0.85rem;
-      padding: 12px 8px !important;
+    @media (max-width: 900px) {
+      .login-screen { grid-template-columns: 1fr; }
+      .login-intro { min-height: 250px; padding: 28px; }
+      .intro-copy { margin: 36px 0 20px; }
+      .intro-copy h1 { margin: 10px 0; font-size: 30px; }
+      .intro-copy p { font-size: 13px; }
+      .intro-foot { display: none; }
+      .login-side { padding: 34px 24px 50px; }
+      .workspace { grid-template-columns: 1fr; }
+      .sidebar { display: flex; align-items: center; gap: 8px; overflow-x: auto; padding: 10px 16px; border-right: 0; border-bottom: 1px solid var(--line); }
+      .side-caption, .side-help { display: none; }
+      .nav-list { display: flex; min-width: max-content; }
+      .nav-button { width: auto; }
+      .main-content { padding: 28px 24px 48px; }
     }
-
-    .slogan-alert {
-      background-color: #fff4e6;
-      border-left: 5px solid #fd7e14;
-      color: #856404;
-      border-radius: 12px;
-    }
-
-    .btn-cell-edit {
-      padding: 2px 6px;
-      font-size: 0.7rem;
-      opacity: 0.6;
-      transition: all 0.2s;
-    }
-
-    .btn-cell-edit:hover {
-      opacity: 1;
-      transform: scale(1.05);
-    }
-    button:disabled {
-      cursor: not-allowed;
-      filter: grayscale(0.5);
-      opacity: 0.7;
+    @media (max-width: 620px) {
+      .topbar { height: 62px; padding: 0 14px; }
+      .topbar-brand { font-size: 12px; }
+      .topbar-brand .brand-symbol { width: 34px; height: 34px; }
+      .topbar-right { gap: 8px; }
+      .user-chip-unit { display: none; }
+      .role-tag { display: none; }
+      .text-button { padding: 7px 3px; font-size: 11px; }
+      .main-content { padding: 23px 14px 42px; }
+      .page-heading { display: block; }
+      .heading-actions { margin-top: 16px; }
+      .stats-grid { grid-template-columns: 1fr; gap: 9px; }
+      .stat-card { min-height: 82px; }
+      .panel-head { align-items: flex-start; flex-direction: column; }
+      .table-tools { width: 100%; }
+      .search-input { width: 100%; }
+      .annual-grid, .detail-grid, .form-grid { grid-template-columns: 1fr; }
+      .login-intro { min-height: 225px; padding: 22px; }
+      .intro-copy { margin-top: 28px; }
     }
   </style>
 </head>
 <body>
-
-<div class="container-wrapper">
-  <!-- 查詢層：初始狀態為 active (在中心) -->
-  <div id="searchLayer" class="view-layer active">
-    <div class="search-card">
-      <div class="text-center">
-        <h2 class="main-title">新北市卡介苗工作人員<br>查詢系統</h2>
+  <main id="loginScreen" class="login-screen">
+    <section class="login-intro" aria-label="系統介紹">
+      <div class="intro-brand"><span class="brand-symbol" aria-hidden="true">✚</span><span>新北市衛生局 · BCG</span></div>
+      <div class="intro-copy">
+        <div class="intro-eyebrow">STAFF INFORMATION SYSTEM</div>
+        <h1>卡介苗工作人員<br>資訊管理系統</h1>
+        <p>提供工作人員資格資料、訓練紀錄與人員清冊查詢，依使用者權限呈現可存取的資料。</p>
       </div>
-      
-      <div class="mb-4">
-        <label class="form-label">姓名</label>
-        <input type="text" id="userName" class="form-control" placeholder="請輸入你的姓名">
-      </div>
-      
-      <div class="mb-4">
-        <label class="form-label">出生日期</label>
-        <input type="date" id="userBirthday" class="form-control">
-      </div>
-      
-      <button onclick="handleSearch()" class="btn-search w-100">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-        查詢個人證書效期
-      </button>
-
-      <button onclick="handleAnnualSearch()" class="btn-search w-100" style="background-color: #9e68ad; margin-top: 16px;">
-        <i data-lucide="user-round-pen" style="width: 20px; height: 20px; stroke-width: 2.5px;"></i>
-        查詢年度參訓成績
-      </button>
-
-      <!-- 重新設計的編輯入口按鈕 -->
-      <button onclick="handleEditView()" class="btn-edit-portal">
-        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-        編輯單位內工作人員資料
-      </button>
-
-      <!-- 資料說明連結 -->
-      <div class="info-link-container">
-        <a href="https://drive.google.com/file/d/1P9NOM4qsF_IGH6hxx1ddNzlwg1atZ_2_/view?usp=drive_link" 
-           target="_blank" 
-           class="info-link">
-          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-          各項訓練定義說明
-        </a>
-      </div>
-
-      <div id="loader" class="loader-container text-center">
-        <div class="spinner-border text-primary" role="status"></div>
-        <p class="mt-3 text-secondary fw-medium">查詢中，請稍後...</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- 結果層：初始狀態為 entry-down (在下方螢幕外) -->
-  <div id="resultLayer" class="view-layer entry-down">
-    <div id="result" class="result-card">
-      <div class="result-header text-center">查詢結果紀錄</div>
-      <div class="info-grid" id="resultContent"></div>
-      <button onclick="goBack()" class="btn-back">
-        ← 重新查詢
-      </button>
-    </div>
-  </div>
-
-  <div id="editLayer" class="view-layer entry-down">
-    <div class="result-card">
-      <div class="result-header d-flex justify-content-between align-items-center">
-        <span>工作人員資料維護</span>
-        <div class="d-flex gap-2">
-          <!-- 匯出 Excel 按鈕 -->
-          <button class="btn btn-sm btn-light" onclick="exportToExcel()">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-            匯出 Excel
-          </button>
-          <button class="btn btn-sm btn-light" onclick="openAddModal()">
-            ＋ 新增工作人員申請
-          </button>
+      <div class="intro-foot">新北市政府衛生局｜卡介苗業務管理</div>
+    </section>
+    <section class="login-side">
+      <form id="loginForm" class="login-card">
+        <h2>登入系統</h2>
+        <p class="subtext">請輸入已登錄的姓名與出生日期以驗證身分。</p>
+        <div class="field">
+          <label for="loginName">姓名</label>
+          <input id="loginName" name="name" type="text" autocomplete="name" placeholder="請輸入姓名" required>
         </div>
-      </div>
-
-      <div class="info-grid p-3" id="editTableContainer">
-        <!-- 表格動態生成 -->
-      </div>
-
-      <button onclick="goBack()" class="btn-back">
-        ← 回查詢頁
-      </button>
-    </div>
-  </div>
-
-</div>
-
-<div class="modal fade" id="addStaffModal" tabindex="-1" aria-labelledby="addStaffModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content custom-modal-content" style="border-radius: 24px;">
-            
-            <!-- Header -->
-            <div class="modal-header">
-                <h5 class="modal-title fw-bold" id="addStaffModalLabel">新增工作人員申請</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-
-            <!-- Body: 使用 p-4 或 p-5 增加邊距 -->
-            <div class="modal-body p-4 p-md-5">
-                
-                <!-- 重要標語區塊 -->
-                <div class="alert slogan-alert d-flex align-items-center mb-4 shadow-sm" role="alert">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-exclamation-triangle-fill flex-shrink-0 me-3" viewBox="0 0 16 16">
-                        <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
-                    </svg>
-                    <div>
-                        <strong>提醒：</strong> 參加當年度初訓合格者由局端匯入，<span class="text-decoration-underline">無須另外申請</span>。
-                    </div>
-                </div>
-
-                <!-- Form: 使用 g-4 增加欄位間距 -->
-                <form id="addStaffForm" class="row g-4">
-
-                  <div class="col-md-6">
-                    <label class="form-label">服務單位</label>
-                    <input type="text" class="form-control" id="add_unit" disabled>
-                  </div>
-
-                  <div class="col-md-6">
-                    <label class="form-label">姓名</label>
-                    <input type="text" class="form-control" id="add_name" required>
-                  </div>
-
-                  <div class="col-md-6">
-                    <label class="form-label">生日</label>
-                    <input type="date" class="form-control" id="add_birthday" required>
-                  </div>
-
-                  <div class="col-md-6">
-                    <label class="form-label">師資統合獲證年度</label>
-                    <input type="text" class="form-control" id="add_master_year">
-                  </div>
-
-                  <div class="col-md-6">
-                    <label class="form-label">種子師資獲證年度</label>
-                    <input type="text" class="form-control" id="add_seed_year">
-                  </div>
-
-                  <div class="col-md-6">
-                    <label class="form-label">最近一次帶初訓日</label>
-                    <input type="date" class="form-control" id="add_last_train">
-                  </div>
-
-                  <div class="col-md-6">
-                    <label class="form-label">技術評價獲證年度</label>
-                    <input type="text" class="form-control" id="add_skill_year">
-                  </div>
-
-                  <div class="col-md-6">
-                    <label class="form-label">初訓獲證年度</label>
-                    <input type="text" class="form-control" id="add_basic_year">
-                  </div>
-
-                  <div class="col-md-6">
-                    <label class="form-label">目前是否執行業務</label>
-                    <select class="form-control" id="add_active">
-                      <option value="是">是</option>
-                      <option value="否">否</option>
-                    </select>
-                  </div>
-
-                  <div class="col-md-6">
-                    <label class="form-label">未執行業務原因</label>
-                    <input type="text" class="form-control" id="add_reason">
-                  </div>
-
-                </form>
-            </div>
-
-            <!-- Footer: 移除邊框並增加底部間距 -->
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary shadow-sm" data-bs-dismiss="modal">取消</button>
-                <button type="button" class="btn btn-primary shadow-sm" onclick="submitAddStaff()">送出申請</button>
-            </div>
+        <div class="field">
+          <label for="loginBirthday">出生日期</label>
+          <input id="loginBirthday" name="birthday" type="date" autocomplete="bday" required>
         </div>
-    </div>
-</div>
+        <button id="loginButton" class="primary-button login-submit" type="submit">登入</button>
+        <p id="loginMessage" class="login-message" role="status" aria-live="polite"></p>
+        <div class="login-note">登入後可查詢個人資料。管理者可依權限查看人員清冊；一般使用者僅能查看本人資料。</div>
+      </form>
+    </section>
+  </main>
 
-<div class="modal fade" id="cellEditModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content" style="border-radius: 20px;">
-      <div class="modal-header border-0 pb-0">
-        <h5 class="modal-title fw-bold" id="cellEditTitle">申請修改</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+  <div id="appShell" class="app-shell hidden">
+    <header class="topbar">
+      <div class="topbar-brand"><span class="brand-symbol" aria-hidden="true">✚</span><span>卡介苗工作人員管理系統</span></div>
+      <div class="topbar-right">
+        <span id="roleTag" class="role-tag">一般人員</span>
+        <div class="user-chip">
+          <span id="userAvatar" class="avatar">用</span>
+          <div><div id="userNameLabel" class="user-chip-name"></div><div id="userUnitLabel" class="user-chip-unit"></div></div>
+        </div>
+        <button id="logoutButton" class="text-button" type="button">登出</button>
       </div>
-      <div class="modal-body">
-        <p class="text-secondary small mb-3">對象：<span id="targetStaffName" class="fw-bold text-dark"></span></p>
-        <label class="form-label fw-medium" id="cellEditLabel"></label>
-        
-        <div id="inputContainer">
+    </header>
+
+    <div class="workspace">
+      <aside class="sidebar">
+        <p class="side-caption">工作區</p>
+        <nav class="nav-list" aria-label="主要導覽">
+          <button class="nav-button active" type="button" data-view="overview"><span class="nav-icon">▦</span>人員總覽</button>
+          <button class="nav-button" type="button" data-view="annual"><span class="nav-icon">▤</span>年度訓練成績</button>
+          <button class="nav-button" type="button" data-view="maintenance"><span class="nav-icon">♧</span>資料維護</button>
+        </nav>
+        <div class="side-help">
+          <strong>訓練資料說明</strong>
+          <p>查看訓練項目與成績定義。</p>
+          <a href="https://drive.google.com/file/d/1P9NOM4qsF_IGH6hxx1ddNzlwg1atZ_2_/view?usp=drive_link" target="_blank" rel="noopener noreferrer">開啟各項訓練定義說明 ↗</a>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <section id="overviewView" class="app-view">
+          <div class="page-heading">
+            <div><div class="eyebrow">STAFF DIRECTORY</div><h1>工作人員總覽</h1><p id="welcomeText">檢視目前可存取的工作人員資料。</p></div>
+            <div class="heading-actions">
+              <button id="annualShortcut" class="outline-button" type="button">查看年度成績</button>
+              <button id="exportButton" class="outline-button" type="button">匯出 Excel</button>
+            </div>
           </div>
-      </div>
-      <div class="modal-footer border-0 pt-0">
-        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">取消</button>
-        <button type="button" class="btn btn-primary rounded-pill px-4" onclick="confirmCellEdit()">確認送出</button>
-      </div>
+          <div id="noticeBox" class="notice hidden"></div>
+          <div class="stats-grid">
+            <article class="stat-card"><div class="stat-icon">♙</div><div><div class="stat-label">可檢視人員</div><div id="totalCount" class="stat-value">—</div></div></article>
+            <article class="stat-card"><div class="stat-icon gold">✓</div><div><div class="stat-label">執行業務中</div><div id="activeCount" class="stat-value">—</div></div></article>
+            <article class="stat-card"><div class="stat-icon blue">▤</div><div><div class="stat-label">已登記技術評價</div><div id="skillCount" class="stat-value">—</div></div></article>
+          </div>
+          <section class="panel">
+            <div class="panel-head">
+              <div><h2>工作人員資料清冊</h2><p id="tableScope">依您的帳號權限顯示</p></div>
+              <div class="table-tools"><input id="directorySearch" class="search-input" type="search" placeholder="搜尋姓名或服務單位" aria-label="搜尋姓名或服務單位"></div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>工作人員</th><th>技術評價</th><th>初訓證照</th><th>業務狀態</th><th>功能</th></tr></thead>
+                <tbody id="staffTableBody"><tr><td colspan="5" class="loading-line">正在載入資料…</td></tr></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section id="annualView" class="app-view hidden">
+          <div class="page-heading">
+            <div><div class="eyebrow">TRAINING RESULTS</div><h1>年度訓練成績</h1><p>查看登入者的年度參訓成績與合格紀錄。</p></div>
+            <div class="heading-actions"><button id="annualRefreshButton" class="outline-button" type="button">重新查詢</button></div>
+          </div>
+          <div id="annualContent" class="annual-grid"><div class="panel empty-state">選取「年度訓練成績」以載入資料。</div></div>
+        </section>
+
+        <section id="maintenanceView" class="app-view hidden">
+          <div class="page-heading">
+            <div><div class="eyebrow">DATA MAINTENANCE</div><h1>資料維護</h1><p id="maintenanceDescription">提出工作人員資料新增或修改申請。</p></div>
+            <div class="heading-actions"><button id="addStaffButton" class="primary-button" type="button">＋ 新增工作人員申請</button></div>
+          </div>
+          <div class="notice">一般使用者送出的變更會以申請方式通知承辦人，不會直接修改清冊內容。</div>
+          <section class="panel">
+            <div class="panel-head"><div><h2>可申請修改的資料</h2><p>選擇人員後，針對欄位提交修改建議。</p></div></div>
+            <div class="table-wrap">
+              <table><thead><tr><th>工作人員</th><th>服務單位</th><th>目前業務狀態</th><th>操作</th></tr></thead><tbody id="maintenanceTableBody"></tbody></table>
+            </div>
+          </section>
+        </section>
+      </main>
     </div>
   </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script>
-// === 全域狀態 ===
-  let currentUserContext = {
-    unit: "",
-    name: "",
-    birthday: ""
-  };
-  let currentUnitStaffData = []; // 暫存單位資料供匯出使用
+  <div id="modalRoot"></div>
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script>
+    (() => {
+      'use strict';
 
-  function handleSearch() {
-    const name = document.getElementById('userName').value.trim();
-    const bday = document.getElementById('userBirthday').value;
-    const loader = document.getElementById('loader');
-    const resultContent = document.getElementById('resultContent');
-    const searchLayer = document.getElementById('searchLayer');
-    const resultLayer = document.getElementById('resultLayer');
+      const state = {
+        user: null,
+        profile: null,
+        staff: [],
+        currentView: 'overview',
+        toastTimer: null
+      };
 
-    if (!name || !bday) {
-      alert("請完整輸入姓名與選擇生日");
-      return;
-    }
+      const $ = (selector, root = document) => root.querySelector(selector);
+      const escapeHtml = (value) => String(value == null ? '' : value)
+        .replace(/[&<>"']/g, char => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[char]));
+      const text = value => String(value == null || value === '' ? '—' : value);
+      const isAdmin = () => Boolean(state.profile && (state.profile.canViewAll || state.profile.role === 'admin'));
 
-    // 1. 開始查詢：鎖定按鈕並顯示 Loading
-    setButtonsDisabled(true);
-    loader.style.display = 'block';
+      function notify(message, isError = false) {
+        const toast = $('#toast');
+        toast.textContent = message;
+        toast.style.background = isError ? '#9f3d3d' : '#173a42';
+        toast.classList.remove('hidden');
+        clearTimeout(state.toastTimer);
+        state.toastTimer = setTimeout(() => toast.classList.add('hidden'), 4200);
+      }
 
-    google.script.run
-      .withSuccessHandler(function(dataArray) {
-        // 2. 查詢結束：不論成功失敗都要解鎖
-        setButtonsDisabled(false);
-        loader.style.display = 'none';
+      function setLoginBusy(busy) {
+        const button = $('#loginButton');
+        button.disabled = busy;
+        button.textContent = busy ? '驗證中…' : '登入';
+        $('#loginMessage').textContent = busy ? '正在驗證資料，請稍候。' : '';
+      }
 
-        if (!dataArray || dataArray.length === 0) {
-          alert("查無此人，請確認姓名與生日是否正確。");
-          return;
-        }
-        // 確保標題是證書查詢
-        document.querySelector('#resultLayer .result-header').innerText = "查詢結果紀錄";
-        resultContent.innerHTML = "";
-        dataArray.forEach(function(item) {
-          const itemDiv = document.createElement('div');
-          itemDiv.className = "info-item";
-          itemDiv.innerHTML = `
-            <div class="info-label">${item.label}</div>
-            <div class="info-value" style="color: ${item.color}">${item.value}</div>
-          `;
-          resultContent.appendChild(itemDiv);
+      function setView(view) {
+        state.currentView = view;
+        document.querySelectorAll('.app-view').forEach(section => section.classList.add('hidden'));
+        const section = $(`#${view}View`);
+        if (section) section.classList.remove('hidden');
+        document.querySelectorAll('.nav-button').forEach(button => {
+          button.classList.toggle('active', button.dataset.view === view);
         });
+        if (view === 'annual') loadAnnualResults();
+      }
 
-        // 動畫切換
-        searchLayer.classList.remove('active');
-        searchLayer.classList.add('exit-up');
-        resultLayer.classList.remove('entry-down');
-        resultLayer.classList.add('active');
-      })
-      .withFailureHandler(function(err) {
-        // 3. 處理伺服器端錯誤：解鎖按鈕
-        setButtonsDisabled(false);
-        loader.style.display = 'none';
-        alert("系統發生錯誤：" + err);
-      })
-      .searchData(name, bday);
-  }
+      function enterApp(profile, name, birthday) {
+        state.profile = profile;
+        state.user = { name, birthday, unit: profile.unit || '' };
+        $('#loginScreen').classList.add('hidden');
+        $('#appShell').classList.remove('hidden');
+        $('#roleTag').textContent = isAdmin() ? '管理者' : '一般人員';
+        $('#userNameLabel').textContent = name;
+        $('#userUnitLabel').textContent = state.user.unit || (isAdmin() ? '全部單位' : '服務單位未設定');
+        $('#userAvatar').textContent = name.charAt(0) || '用';
+        $('#welcomeText').textContent = isAdmin()
+          ? '管理者可檢視全體工作人員資料。'
+          : '您目前僅能檢視自己的工作人員資料。';
+        $('#tableScope').textContent = isAdmin() ? '管理者權限 · 全體人員清冊' : '一般使用者權限 · 僅顯示本人資料';
+        $('#maintenanceDescription').textContent = isAdmin()
+          ? '管理者可檢視全體清冊，並提出新增或修改申請。'
+          : '提出本人資料的新增或修改申請。';
+        $('#exportButton').classList.toggle('hidden', !isAdmin());
+        $('#addStaffButton').classList.toggle('hidden', !isAdmin());
+        loadDirectory();
+      }
 
-  // === 控制所有按鈕與輸入框狀態的函式 ===
-  function setButtonsDisabled(status) {
-    const buttons = document.querySelectorAll('button');
-    const inputs = document.querySelectorAll('input');
-    
-    buttons.forEach(btn => btn.disabled = status);
-    inputs.forEach(input => input.disabled = status);
-  }
+      function login(name, birthday) {
+        $('#loginMessage').textContent = '';
+        setLoginBusy(true);
+        google.script.run
+          .withSuccessHandler(profile => {
+            setLoginBusy(false);
+            if (!profile || profile.error) {
+              const messages = {
+                NOT_FOUND: '查無此人，請確認姓名與出生日期。',
+                ACCOUNT_DISABLED: '此帳號目前未啟用，請聯絡系統管理人員。',
+                SHEET_NOT_FOUND: '系統資料表不存在，請聯絡系統管理人員。'
+              };
+              $('#loginMessage').textContent = messages[profile && profile.error] || '身分驗證失敗，請確認輸入資料。';
+              return;
+            }
+            enterApp(profile, name, birthday);
+          })
+          .withFailureHandler(error => {
+            setLoginBusy(false);
+            $('#loginMessage').textContent = `登入發生錯誤：${error && error.message ? error.message : error}`;
+          })
+          .getUserAccessProfile(name, birthday);
+      }
 
-  // 點「檢視 / 編輯」的完整流程
-  function handleEditView() {
-    const name = document.getElementById('userName').value.trim();
-    const bday = document.getElementById('userBirthday').value;
-    const loader = document.getElementById("loader");
+      function normalizeRow(row) {
+        return {
+          ...row,
+          '姓名': row['姓名'] || '',
+          '生日': row['生日'] || '',
+          '服務單位': row['服務單位'] || '',
+          '目前是否執行業務': row['目前是否執行業務'] || ''
+        };
+      }
 
-    if (!name || !bday) { alert("請先輸入姓名與生日"); return; }
-    
-    // 1. 開始請求：鎖定按鈕
-    setButtonsDisabled(true);
-    loader.style.display = "block";
+      function loadDirectory() {
+        $('#staffTableBody').innerHTML = '<tr><td colspan="5" class="loading-line">正在載入資料…</td></tr>';
+        $('#maintenanceTableBody').innerHTML = '<tr><td colspan="4" class="loading-line">正在載入資料…</td></tr>';
+        google.script.run
+          .withSuccessHandler(response => {
+            if (!response || response.error) {
+              state.staff = [];
+              renderDirectoryError(response && response.error);
+              return;
+            }
+            state.staff = Array.isArray(response.list) ? response.list.map(normalizeRow) : [];
+            if (response.unit) state.user.unit = response.unit === '全部單位' ? state.profile.unit : response.unit;
+            $('#userUnitLabel').textContent = state.profile.unit || (isAdmin() ? '全部單位' : '服務單位未設定');
+            renderDirectory();
+          })
+          .withFailureHandler(error => {
+            state.staff = [];
+            renderDirectoryError(error && error.message ? error.message : error);
+          })
+          .getUnitStaffList(state.user.name, state.user.birthday);
+      }
 
-    google.script.run
-      .withSuccessHandler(res => {
-        // 2. 請求結束：解鎖
-        setButtonsDisabled(false);
-        loader.style.display = "none";
-        
-        if (!res) { alert("查無資料"); return; }
-        if (res.error === "NOT_ACTIVE") { alert("你已非本業務人員，無權瀏覽"); return; }
-        if (res.error === "NOT_FOUND") { alert("查無此人，請確認姓名與生日"); return; }
+      function renderDirectoryError(error) {
+        const message = error === 'NOT_ACTIVE'
+          ? '目前帳號標記為未執行業務，無法載入資料清冊。'
+          : `無法載入資料清冊${error ? `（${error}）` : ''}。請稍後重試或聯絡管理人員。`;
+        $('#staffTableBody').innerHTML = `<tr><td colspan="5" class="empty-state">${escapeHtml(message)}</td></tr>`;
+        $('#maintenanceTableBody').innerHTML = `<tr><td colspan="4" class="empty-state">${escapeHtml(message)}</td></tr>`;
+        $('#totalCount').textContent = '0';
+        $('#activeCount').textContent = '0';
+        $('#skillCount').textContent = '0';
+        $('#noticeBox').textContent = message;
+        $('#noticeBox').classList.remove('hidden');
+      }
 
-        currentUserContext = { unit: res.unit, name, birthday: bday };
-        currentUnitStaffData = res.list; 
-        renderUnitTable(res.list);
-        
-        const searchLayer = document.getElementById('searchLayer');
-        const editLayer = document.getElementById('editLayer');
-        
-        searchLayer.classList.remove("active");
-        searchLayer.classList.add("exit-up");
-        editLayer.classList.remove("entry-down");
-        editLayer.classList.add("active");
-      })
-      .withFailureHandler(err => {
-        // 3. 錯誤處理：解鎖
-        setButtonsDisabled(false);
-        loader.style.display = "none";
-        alert("系統發生錯誤：" + err);
-      })
-      .getUnitStaffList(name, bday);
-  }
+      function renderDirectory() {
+        const activeCount = state.staff.filter(row => row['目前是否執行業務'] !== '否').length;
+        const skillCount = state.staff.filter(row => row['技術評價獲證年度']).length;
+        $('#totalCount').textContent = String(state.staff.length);
+        $('#activeCount').textContent = String(activeCount);
+        $('#skillCount').textContent = String(skillCount);
+        $('#noticeBox').classList.add('hidden');
+        renderStaffTable(state.staff);
+        renderMaintenanceTable();
+      }
 
-  // 匯出 Excel 功能
-  function exportToExcel() {
-    // 1. 取得表格元素
-    const tableContainer = document.getElementById("editTableContainer");
-    const originalTable = tableContainer.querySelector("table");
-
-    if (!originalTable) {
-      alert("目前無資料可供匯出");
-      return;
-    }
-
-    // 2. 複製一份表格節點，避免影響畫面顯示
-    const clonedTable = originalTable.cloneNode(true);
-
-    // 3. 移除複製表格中的所有「申請修改」按鈕
-    const buttons = clonedTable.querySelectorAll('.btn-cell-edit');
-    buttons.forEach(btn => btn.remove());
-
-    try {
-      // 4. 將 HTML 表格轉換為工作表
-      const worksheet = XLSX.utils.table_to_sheet(clonedTable);
-      
-      // 5. 建立活頁簿並加入工作表
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "工作人員清單");
-
-      // 6. 產生檔名（單位_日期）
-      const dateStr = new Date().toISOString().slice(0, 10);
-      const fileName = `${currentUserContext.unit || '新北市'}_工作人員清單_${dateStr}.xlsx`;
-
-      // 7. 下載檔案
-      XLSX.writeFile(workbook, fileName);
-      
-    } catch (e) {
-      console.error(e);
-      alert("匯出失敗，錯誤訊息：" + e.message);
-    }
-  }
-
-  // === 欄位型態設定 ===
-  const fieldConfig = {
-    "姓名": { type: "text" },
-    "生日": { type: "date" },
-    "師資統合獲證年度": { type: "number" },
-    "種子師資獲證年度": { type: "number" },
-    "最近一次帶初訓日": { type: "date" },
-    "技術評價獲證年度": { type: "number" },
-    "初訓獲證年度": { type: "number" },
-    "目前是否執行業務": { type: "select", options: ["是", "否"] },
-    "未執行業務原因": { type: "text" }
-  };
-
-  const displayOnlyFields = [
-    "師資年限",
-    "施打年限",
-    "檢核",
-    "建議參訓項目"
-  ];
-
-  const editableFields = [
-    "服務單位",
-    ...Object.keys(fieldConfig),
-    ...displayOnlyFields
-  ];
-
-  // 暫存當前正在編輯的資訊
-  let activeEdit = { targetName: "", field: "", type: "" };
-
-  function renderUnitTable(list) {
-    // 進入編輯頁時，動態放大容器
-    document.body.classList.add('has-edit-active');
-    
-    const container = document.getElementById("editTableContainer");
-    let html = `
-      <div class="table-responsive border">
-        <table class="table table-hover align-middle text-center edit-table mb-0">
-          <thead>
-            <tr>
-              ${editableFields.map(f => `<th>${f}</th>`).join("")}
-            </tr>
-          </thead>
-          <tbody>
-    `;
-
-    list.forEach(row => {
-      html += "<tr>";
-      editableFields.forEach(field => {
-        const value = row[field] || "";
-        html += `<td>`;
-        html += `<div>${value}</div>`;
-        
-        // 只有「非服務單位」才顯示按鈕
-        const nonEditableFields = [
-          "服務單位",
-          "師資年限",
-          "施打年限",
-          "檢核",
-          "建議參訓項目"
-        ];
-
-        if (!nonEditableFields.includes(field)) {
-          html += `
-            <button class="btn btn-outline-primary btn-sm btn-cell-edit mx-auto"
-              onclick="openCellEditModal('${row["姓名"]}', '${field}', '${value}')">
-              申請修改
-            </button>
-          `;
-        }
-        
-        html += `</td>`;
-      });
-      html += "</tr>";
-    });
-
-    html += "</tbody></table></div>";
-    container.innerHTML = html;
-  }
-
-
-  // 開啟編輯 Modal
-  function openCellEditModal(targetName, field, currentValue) {
-    const config = fieldConfig[field];
-    activeEdit = { targetName, field, type: config.type };
-    
-    document.getElementById('targetStaffName').innerText = targetName;
-    document.getElementById('cellEditLabel').innerText = `請輸入新的「${field}」內容：`;
-    
-    const container = document.getElementById('inputContainer');
-    container.innerHTML = ''; // 清空
-
-    if (config.type === 'select') {
-      let selectHtml = `<select id="cellNewValue" class="form-control rounded-pill">`;
-      config.options.forEach(opt => {
-        const selected = (opt === currentValue) ? 'selected' : '';
-        selectHtml += `<option value="${opt}" ${selected}>${opt}</option>`;
-      });
-      selectHtml += `</select>`;
-      container.innerHTML = selectHtml;
-    } else {
-      // text, date, number
-      const inputType = config.type;
-      container.innerHTML = `<input type="${inputType}" id="cellNewValue" class="form-control rounded-pill" value="${currentValue}">`;
-    }
-
-    const modal = new bootstrap.Modal(document.getElementById('cellEditModal'));
-    modal.show();
-  }
-
-  // 確認送出編輯請求
-  function confirmCellEdit() {
-    const newValue = document.getElementById('cellNewValue').value;
-    if (!newValue) { alert("請輸入內容"); return; }
-
-    const modalEl = document.getElementById('cellEditModal');
-    const confirmBtn = modalEl.querySelector('.btn-primary');
-    const cancelBtn = modalEl.querySelector('.btn-light');
-
-    // 暫存原始文字
-    const originalText = confirmBtn.innerText;
-
-    // --- 鎖定按鈕 ---
-    confirmBtn.disabled = true;
-    cancelBtn.disabled = true;
-    confirmBtn.innerText = "傳送中...";
-
-    // 定義恢復按鈕的輔助函式
-    const restoreButtons = () => {
-      confirmBtn.disabled = false;
-      cancelBtn.disabled = false;
-      confirmBtn.innerText = originalText;
-    };
-
-    google.script.run
-      .withSuccessHandler(() => {
-        bootstrap.Modal.getInstance(modalEl).hide();
-        alert("請求已送出，待承辦人確認後修改");
-        restoreButtons(); // 恢復按鈕狀態
-      })
-      .withFailureHandler((err) => {
-        alert("傳送失敗：" + err);
-        restoreButtons(); // 失敗也要恢復，讓使用者能重試
-      })
-      .addEditCommentByName(
-        currentUserContext.unit, 
-        activeEdit.targetName, 
-        activeEdit.field, 
-        newValue, 
-        currentUserContext.name
-      );
-  }
-
-  function openAddModal() {
-    document.getElementById("add_unit").value = currentUserContext.unit;
-    document.getElementById("addStaffForm").reset();
-    document.getElementById("add_unit").value = currentUserContext.unit; // Reset 後再填一次
-    const modal = new bootstrap.Modal(document.getElementById("addStaffModal"));
-    modal.show();
-  }
-
-  function submitAddStaff() {
-    const modalEl = document.getElementById('addStaffModal');
-    const confirmBtn = modalEl.querySelector('.btn-primary');
-    const cancelBtn = modalEl.querySelector('.btn-secondary');
-    
-    const formData = {
-      "服務單位": document.getElementById("add_unit").value,
-      "姓名": document.getElementById("add_name").value,
-      "生日": document.getElementById("add_birthday").value,
-      "師資統合獲證年度": document.getElementById("add_master_year").value,
-      "種子師資獲證年度": document.getElementById("add_seed_year").value,
-      "最近一次帶初訓日": document.getElementById("add_last_train").value,
-      "技術評價獲證年度": document.getElementById("add_skill_year").value,
-      "初訓獲證年度": document.getElementById("add_basic_year").value,
-      "目前是否執行業務": document.getElementById("add_active").value,
-      "未執行業務原因": document.getElementById("add_reason").value,
-    };
-
-    if (!formData["姓名"] || !formData["生日"]) { alert("姓名與生日為必填"); return; }
-
-    const originalText = confirmBtn.innerText;
-
-    // --- 鎖定按鈕 ---
-    confirmBtn.disabled = true;
-    cancelBtn.disabled = true;
-    confirmBtn.innerText = "正在發送...";
-
-    const restoreButtons = () => {
-      confirmBtn.disabled = false;
-      cancelBtn.disabled = false;
-      confirmBtn.innerText = originalText;
-    };
-
-    google.script.run
-      .withSuccessHandler(() => {
-        bootstrap.Modal.getInstance(modalEl).hide();
-        alert("請求已送出，待承辦人確認後新增");
-        restoreButtons();
-      })
-      .withFailureHandler((err) => {
-        alert("申請失敗：" + err);
-        restoreButtons();
-      })
-      .sendNewStaffRequest(formData);
-  }
-
-  // 輔助函式：切換圖層
-  function switchLayer(fromId, toId) {
-    document.getElementById(fromId).classList.remove('active');
-    document.getElementById(fromId).classList.add('exit-up');
-    document.getElementById(toId).classList.remove('entry-down');
-    document.getElementById(toId).classList.add('active');
-  }
-
-  // 修改 goBack 確保縮回寬度
-  function goBack() {
-    document.body.classList.remove('has-edit-active');
-    const layers = ['resultLayer', 'editLayer'];
-    layers.forEach(id => {
-      const layer = document.getElementById(id);
-      layer.classList.remove('active');
-      layer.classList.add('entry-down');
-    });
-    const searchLayer = document.getElementById('searchLayer');
-    searchLayer.classList.remove('exit-up');
-    searchLayer.classList.add('active');
-  }
-
-//查詢參訓成績
-  function handleAnnualSearch() {
-    const name = document.getElementById('userName').value.trim();
-    const bday = document.getElementById('userBirthday').value;
-    const loader = document.getElementById('loader');
-    const resultContent = document.getElementById('resultContent');
-    const searchLayer = document.getElementById('searchLayer');
-    const resultLayer = document.getElementById('resultLayer');
-
-    if (!name || !bday) {
-      alert("請完整輸入姓名與選擇生日");
-      return;
-    }
-
-    setButtonsDisabled(true);
-    loader.style.display = 'block';
-
-    google.script.run
-      .withSuccessHandler(function(data) {
-        setButtonsDisabled(false);
-        loader.style.display = 'none';
-
-        if (!data) {
-          alert("查無此人，請確認姓名與生日是否正確。");
+      function renderStaffTable(rows) {
+        const tbody = $('#staffTableBody');
+        if (!rows.length) {
+          tbody.innerHTML = '<tr><td colspan="5" class="empty-state">目前沒有可顯示的工作人員資料。</td></tr>';
           return;
         }
+        tbody.innerHTML = rows.map((row, index) => {
+          const name = escapeHtml(row['姓名']);
+          const unit = escapeHtml(row['服務單位']);
+          const inactive = row['目前是否執行業務'] === '否';
+          return `<tr>
+            <td><div class="person-cell"><span class="person-initial">${escapeHtml((row['姓名'] || '用').charAt(0))}</span><div><div class="person-name">${name || '未提供姓名'}</div><div class="person-unit">${unit || '未設定單位'}</div></div></div></td>
+            <td>${escapeHtml(text(row['技術評價獲證年度']))}</td>
+            <td>${escapeHtml(text(row['初訓獲證年度']))}</td>
+            <td><span class="status${inactive ? ' inactive' : ''}">${inactive ? '未執行' : '執行中'}</span></td>
+            <td><div class="row-actions"><button class="small-action" type="button" data-action="detail" data-index="${index}">檢視資料</button></div></td>
+          </tr>`;
+        }).join('');
+      }
 
-        // 修改結果層的標題
-        document.querySelector('#resultLayer .result-header').innerText = "年度參訓結果";
-        
-        // 用來建立分類區塊的輔助函式
-        const createSection = (title, items) => {
-          let sectionHtml = `<div class="bg-light px-4 py-2 fw-bold" style="color: #475569; font-size: 0.95rem; border-bottom: 1px solid #e2e8f0; border-top: 1px solid #e2e8f0;">${title}</div>`;
-          let hasData = false;
-          
-          items.forEach(item => {
-            // 檢查 item.data 是否有值
-            if (item.data && item.data.val !== null && item.data.val !== "") {
-              hasData = true;
-              sectionHtml += `
-                <div class="info-item">
-                  <div class="info-label">${item.label}</div>
-                  <div class="info-value fw-medium" style="color: ${item.data.color};">${item.data.val}</div>
-                </div>
-              `;
+      function renderMaintenanceTable() {
+        const tbody = $('#maintenanceTableBody');
+        if (!state.staff.length) {
+          tbody.innerHTML = '<tr><td colspan="4" class="empty-state">目前沒有可維護的資料。</td></tr>';
+          return;
+        }
+        tbody.innerHTML = state.staff.map((row, index) => {
+          const inactive = row['目前是否執行業務'] === '否';
+          return `<tr>
+            <td><div class="person-cell"><span class="person-initial">${escapeHtml((row['姓名'] || '用').charAt(0))}</span><span class="person-name">${escapeHtml(row['姓名'] || '未提供姓名')}</span></div></td>
+            <td>${escapeHtml(row['服務單位'] || '未設定單位')}</td>
+            <td><span class="status${inactive ? ' inactive' : ''}">${inactive ? '未執行' : '執行中'}</span></td>
+            <td><button class="small-action" type="button" data-action="edit" data-index="${index}">申請修改</button></td>
+          </tr>`;
+        }).join('');
+      }
+
+      function openModal(title, content, footer = '') {
+        $('#modalRoot').innerHTML = `<div class="modal-backdrop" data-dismiss="true"><section class="modal" role="dialog" aria-modal="true" aria-label="${escapeHtml(title)}"><header class="modal-head"><h2>${escapeHtml(title)}</h2><button class="close-button" type="button" data-dismiss="true" aria-label="關閉">×</button></header><div class="modal-body">${content}</div>${footer ? `<footer class="modal-foot">${footer}</footer>` : ''}</section></div>`;
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeModal() {
+        $('#modalRoot').innerHTML = '';
+        document.body.style.overflow = '';
+      }
+
+      function showDetails(row) {
+        const fields = [
+          '服務單位', '姓名', '生日', '師資統合獲證年度', '種子師資獲證年度',
+          '最近一次帶初訓日', '技術評價獲證年度', '初訓獲證年度',
+          '目前是否執行業務', '未執行業務原因', '師資年限', '施打年限',
+          '檢核', '建議參訓項目'
+        ];
+        const content = '<div id="detailContent" class="detail-grid"><div class="loading-line">正在載入詳細資料…</div></div>';
+        const footer = '<button class="outline-button" type="button" data-dismiss="true">關閉</button>';
+        openModal(`${row['姓名'] || '工作人員'}｜資料明細`, content, footer);
+        google.script.run
+          .withSuccessHandler(result => {
+            if (!result) {
+              $('#detailContent').innerHTML = '<div class="empty-state">查無詳細資料。</div>';
+              return;
             }
-          });
+            $('#detailContent').innerHTML = fields.map(field =>
+              `<div class="detail-item"><div class="detail-label">${escapeHtml(field)}</div><div class="detail-value">${escapeHtml(text(result[field]))}</div></div>`
+            ).join('');
+          })
+          .withFailureHandler(error => {
+            $('#detailContent').innerHTML = `<div class="empty-state">載入失敗：${escapeHtml(error && error.message ? error.message : error)}</div>`;
+          })
+          .getStaffDetail(row['姓名'], row['生日']);
+      }
 
-          // 如果該分類完全沒有成績資料
-          if (!hasData) {
-            sectionHtml += `
-              <div class="info-item justify-content-center text-muted" style="background-color: #fafafa;">
-                <span style="font-size: 0.9rem;">今年未參訓該項目或成績未公布</span>
-              </div>
-            `;
-          }
-          return sectionHtml;
+      function loadAnnualResults() {
+        const content = $('#annualContent');
+        content.innerHTML = '<div class="panel empty-state">正在載入年度訓練成績…</div>';
+        google.script.run
+          .withSuccessHandler(result => {
+            if (!result) {
+              content.innerHTML = '<div class="panel empty-state">目前查無年度訓練成績。</div>';
+              return;
+            }
+            if (result.error) {
+              content.innerHTML = `<div class="panel empty-state">${escapeHtml(result.error)}</div>`;
+              return;
+            }
+            const sections = [
+              ['師資統合訓練', [['判讀成績', result.master && result.master.read], ['皮內注射技術成績', result.master && result.master.inject], ['是否合格', result.master && result.master.pass]]],
+              ['種子師資訓練', [['成績', result.seed && result.seed.score], ['是否合格', result.seed && result.seed.pass]]],
+              ['技術評價', [['判讀成績', result.skill && result.skill.read], ['判讀補考成績', result.skill && result.skill.readMakeup], ['皮內注射技術成績', result.skill && result.skill.inject], ['皮內注射補考成績', result.skill && result.skill.injectMakeup], ['是否合格', result.skill && result.skill.pass]]]
+            ];
+            content.innerHTML = sections.map(([title, rows]) =>
+              `<article class="annual-card"><h3>${escapeHtml(title)}</h3>${rows.map(([label, cell]) => {
+                const value = cell && typeof cell === 'object' ? cell.val : cell;
+                return `<div class="annual-row"><span>${escapeHtml(label)}</span><span>${escapeHtml(text(value))}</span></div>`;
+              }).join('')}</article>`
+            ).join('');
+          })
+          .withFailureHandler(error => {
+            content.innerHTML = `<div class="panel empty-state">成績載入失敗：${escapeHtml(error && error.message ? error.message : error)}</div>`;
+          })
+          .searchAnnualResults(state.user.name, state.user.birthday);
+      }
+
+      const editableFields = {
+        '姓名': { type: 'text' },
+        '生日': { type: 'date' },
+        '師資統合獲證年度': { type: 'number' },
+        '種子師資獲證年度': { type: 'number' },
+        '最近一次帶初訓日': { type: 'date' },
+        '技術評價獲證年度': { type: 'number' },
+        '初訓獲證年度': { type: 'number' },
+        '目前是否執行業務': { type: 'select' },
+        '未執行業務原因': { type: 'text' }
+      };
+
+      function requestEdit(row) {
+        const fields = Object.keys(editableFields);
+        const content = `<p class="subtext">修改對象：<strong>${escapeHtml(row['姓名'])}</strong></p><div class="field"><label for="editField">修改欄位</label><select id="editField">${fields.map(field => `<option value="${escapeHtml(field)}">${escapeHtml(field)}</option>`).join('')}</select></div><div id="editValueContainer" class="field"></div>`;
+        const footer = '<button class="outline-button" type="button" data-dismiss="true">取消</button><button id="submitEditButton" class="primary-button" type="button">送出修改申請</button>';
+        openModal('申請修改工作人員資料', content, footer);
+        const fieldSelect = $('#editField');
+        const renderInput = () => {
+          const field = fieldSelect.value;
+          const config = editableFields[field];
+          const value = row[field] || '';
+          const input = config.type === 'select'
+            ? `<select id="editValue"><option value="是" ${value === '是' ? 'selected' : ''}>是</option><option value="否" ${value === '否' ? 'selected' : ''}>否</option></select>`
+            : `<input id="editValue" type="${config.type}" value="${escapeHtml(value)}">`;
+          $('#editValueContainer').innerHTML = `<label for="editValue">新資料</label>${input}`;
         };
+        fieldSelect.addEventListener('change', renderInput);
+        renderInput();
+        $('#submitEditButton').addEventListener('click', () => {
+          const field = fieldSelect.value;
+          const value = $('#editValue').value.trim();
+          if (!value) {
+            notify('請輸入修改內容。', true);
+            return;
+          }
+          const button = $('#submitEditButton');
+          button.disabled = true;
+          button.textContent = '送出中…';
+          google.script.run
+            .withSuccessHandler(result => {
+              closeModal();
+              if (result === false) {
+                notify('找不到對應人員資料，申請未送出。', true);
+                return;
+              }
+              notify('修改申請已送出，待承辦人確認。');
+            })
+            .withFailureHandler(error => {
+              button.disabled = false;
+              button.textContent = '送出修改申請';
+              notify(`送出失敗：${error && error.message ? error.message : error}`, true);
+            })
+            .addEditCommentByName(row['服務單位'], row['姓名'], field, value, state.user.name);
+        });
+      }
 
-        // 開始組合 HTML
-        let html = "";
-        
-        html += createSection("📘 師資統合", [
-          { label: "判讀成績", data: data.master.read },
-          { label: "皮內注射技術成績", data: data.master.inject },
-          { label: "是否合格", data: data.master.pass }
-        ]);
+      function requestAddStaff() {
+        const fields = [
+          ['服務單位', 'add_unit', 'text'], ['姓名', 'add_name', 'text'], ['生日', 'add_birthday', 'date'],
+          ['師資統合獲證年度', 'add_master_year', 'number'], ['種子師資獲證年度', 'add_seed_year', 'number'],
+          ['最近一次帶初訓日', 'add_last_train', 'date'], ['技術評價獲證年度', 'add_skill_year', 'number'],
+          ['初訓獲證年度', 'add_basic_year', 'number'], ['目前是否執行業務', 'add_active', 'select'],
+          ['未執行業務原因', 'add_reason', 'text']
+        ];
+        const content = `<div class="notice">當年度初訓合格者由局端匯入，無須另外申請。</div><div class="form-grid">${fields.map(([label, id, type]) => {
+          if (type === 'select') return `<div class="field"><label for="${id}">${label}</label><select id="${id}"><option value="是">是</option><option value="否">否</option></select></div>`;
+          const value = id === 'add_unit' ? state.user.unit : '';
+          return `<div class="field"><label for="${id}">${label}</label><input id="${id}" type="${type}" value="${escapeHtml(value)}" ${id === 'add_unit' ? 'readonly' : ''} ${['add_name', 'add_birthday'].includes(id) ? 'required' : ''}></div>`;
+        }).join('')}</div>`;
+        const footer = '<button class="outline-button" type="button" data-dismiss="true">取消</button><button id="submitAddButton" class="primary-button" type="button">送出新增申請</button>';
+        openModal('新增工作人員申請', content, footer);
+        $('#submitAddButton').addEventListener('click', () => {
+          const formData = {
+            '服務單位': $('#add_unit').value,
+            '姓名': $('#add_name').value.trim(),
+            '生日': $('#add_birthday').value,
+            '師資統合獲證年度': $('#add_master_year').value,
+            '種子師資獲證年度': $('#add_seed_year').value,
+            '最近一次帶初訓日': $('#add_last_train').value,
+            '技術評價獲證年度': $('#add_skill_year').value,
+            '初訓獲證年度': $('#add_basic_year').value,
+            '目前是否執行業務': $('#add_active').value,
+            '未執行業務原因': $('#add_reason').value
+          };
+          if (!formData['姓名'] || !formData['生日']) {
+            notify('姓名與生日為必填欄位。', true);
+            return;
+          }
+          const button = $('#submitAddButton');
+          button.disabled = true;
+          button.textContent = '送出中…';
+          google.script.run
+            .withSuccessHandler(() => {
+              closeModal();
+              notify('新增申請已送出，待承辦人確認。');
+            })
+            .withFailureHandler(error => {
+              button.disabled = false;
+              button.textContent = '送出新增申請';
+              notify(`申請失敗：${error && error.message ? error.message : error}`, true);
+            })
+            .sendNewStaffRequest(formData);
+        });
+      }
 
-        html += createSection("📗 種子師資", [
-          { label: "成績", data: data.seed.score },
-          { label: "是否合格", data: data.seed.pass }
-        ]);
+      function exportStaff() {
+        if (!state.staff.length) {
+          notify('目前沒有資料可匯出。', true);
+          return;
+        }
+        if (!window.XLSX) {
+          notify('Excel 匯出元件載入失敗，請重新整理後再試。', true);
+          return;
+        }
+        const columns = ['服務單位', '姓名', '生日', '師資統合獲證年度', '種子師資獲證年度', '最近一次帶初訓日', '技術評價獲證年度', '初訓獲證年度', '目前是否執行業務', '未執行業務原因'];
+        try {
+          const rows = state.staff.map(row => columns.map(column => row[column] == null ? '' : row[column]));
+          const sheet = window.XLSX.utils.aoa_to_sheet([columns, ...rows]);
+          const workbook = window.XLSX.utils.book_new();
+          window.XLSX.utils.book_append_sheet(workbook, sheet, '工作人員清單');
+          window.XLSX.writeFile(workbook, `工作人員清單_${new Date().toISOString().slice(0, 10)}.xlsx`);
+        } catch (error) {
+          notify(`Excel 匯出失敗：${error && error.message ? error.message : error}`, true);
+        }
+      }
 
-        html += createSection("📙 技術評價", [
-          { label: "判讀成績", data: data.skill.read },
-          { label: "判讀成績（補考）", data: data.skill.readMakeup },
-          { label: "皮內注射技術成績", data: data.skill.inject },
-          { label: "皮內注射技術成績（補考）", data: data.skill.injectMakeup },
-          { label: "是否合格", data: data.skill.pass }
-        ]);
+      $('#loginForm').addEventListener('submit', event => {
+        event.preventDefault();
+        const name = $('#loginName').value.trim();
+        const birthday = $('#loginBirthday').value;
+        if (!name || !birthday) {
+          $('#loginMessage').textContent = '請輸入姓名與出生日期。';
+          return;
+        }
+        login(name, birthday);
+      });
 
-        resultContent.innerHTML = html;
-
-        // 動畫切換 (使用與原本相同的過渡效果)
-        searchLayer.classList.remove('active');
-        searchLayer.classList.add('exit-up');
-        resultLayer.classList.remove('entry-down');
-        resultLayer.classList.add('active');
-      })
-      .withFailureHandler(function(err) {
-        setButtonsDisabled(false);
-        loader.style.display = 'none';
-        alert("系統發生錯誤：" + err);
-      })
-      .searchAnnualResults(name, bday);
-  }
-  lucide.createIcons();
-</script>
-
+      document.querySelectorAll('.nav-button').forEach(button => {
+        button.addEventListener('click', () => setView(button.dataset.view));
+      });
+      $('#annualShortcut').addEventListener('click', () => setView('annual'));
+      $('#annualRefreshButton').addEventListener('click', loadAnnualResults);
+      $('#addStaffButton').addEventListener('click', requestAddStaff);
+      $('#exportButton').addEventListener('click', exportStaff);
+      $('#directorySearch').addEventListener('input', event => {
+        const query = event.target.value.trim().toLowerCase();
+        const matches = state.staff.filter(row =>
+          String(row['姓名'] || '').toLowerCase().includes(query) ||
+          String(row['服務單位'] || '').toLowerCase().includes(query)
+        );
+        renderStaffTable(matches);
+      });
+      $('#staffTableBody').addEventListener('click', event => {
+        const button = event.target.closest('[data-action="detail"]');
+        if (button) showDetails(state.staff[Number(button.dataset.index)]);
+      });
+      $('#maintenanceTableBody').addEventListener('click', event => {
+        const button = event.target.closest('[data-action="edit"]');
+        if (button) requestEdit(state.staff[Number(button.dataset.index)]);
+      });
+      $('#modalRoot').addEventListener('click', event => {
+        if (event.target.dataset.dismiss === 'true') closeModal();
+      });
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && !$('#modalRoot').classList.contains('hidden')) closeModal();
+      });
+      $('#logoutButton').addEventListener('click', () => {
+        state.user = null;
+        state.profile = null;
+        state.staff = [];
+        $('#appShell').classList.add('hidden');
+        $('#loginScreen').classList.remove('hidden');
+        $('#loginForm').reset();
+        $('#loginMessage').textContent = '';
+        $('#staffTableBody').innerHTML = '';
+        setView('overview');
+      });
+    })();
+  </script>
 </body>
 </html>

@@ -8,6 +8,113 @@ function doGet() {
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
+function normalizeText(value) {
+  return String(value || '').replace(/\s+/g, '').trim();
+}
+
+function normalizeDateValue(value) {
+  if (!value) return '';
+  if (value instanceof Date) {
+    return Utilities.formatDate(value, 'GMT+8', 'yyyy-MM-dd');
+  }
+  const date = new Date(value);
+  if (!isNaN(date.getTime())) {
+    return Utilities.formatDate(date, 'GMT+8', 'yyyy-MM-dd');
+  }
+  return String(value).trim();
+}
+
+function normalizeUnit(value) {
+  return String(value || '').replace(/\s+/g, '').trim();
+}
+
+function isAdminRole(roleValue, unitValue) {
+  const role = String(roleValue || '').trim().toLowerCase();
+  const unit = normalizeUnit(unitValue);
+  const isHealthDepartmentAdmin = unit === '新北市政府衛生局';
+  if (isHealthDepartmentAdmin) return true;
+  if (!role) return false;
+  return ['admin', '管理者', '主管', '系統管理者', '系統管理', 'administrator'].includes(role) || role.includes('admin');
+}
+
+function getUserAccessProfile(searchName, searchBirthday) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const profileSheet = ss.getSheetByName('權限管理') || ss.getSheetByName('UserAccess') || ss.getSheetByName('使用者權限');
+  const staffSheet = ss.getSheetByName('新北市在職清冊');
+
+  if (!staffSheet) {
+    return { role: 'user', unit: '', canViewAll: false, error: 'SHEET_NOT_FOUND' };
+  }
+
+  const nameKey = normalizeText(searchName);
+  const birthdayKey = normalizeDateValue(searchBirthday);
+
+  if (profileSheet) {
+    const lastRow = profileSheet.getLastRow();
+    if (lastRow >= 2) {
+      const headers = profileSheet.getRange(1, 1, 1, profileSheet.getLastColumn()).getValues()[0];
+      const data = profileSheet.getRange(2, 1, lastRow - 1, headers.length).getValues();
+
+      const nameIdx = headers.indexOf('姓名');
+      const bdayIdx = headers.indexOf('生日');
+      const roleIdx = headers.indexOf('角色');
+      const unitIdx = headers.indexOf('服務單位');
+      const activeIdx = headers.indexOf('啟用狀態');
+
+      for (let i = 0; i < data.length; i++) {
+        const rowName = normalizeText(data[i][nameIdx]);
+        const rowBirthday = normalizeDateValue(data[i][bdayIdx]);
+        const rowActive = String(data[i][activeIdx] || '').trim();
+
+        if (rowName === nameKey && rowBirthday === birthdayKey) {
+          const role = String(data[i][roleIdx] || '').trim();
+          const unit = String(data[i][unitIdx] || '').trim();
+          const isActive = activeIdx === -1 || rowActive === '' || rowActive === '啟用' || rowActive === 'Y' || rowActive === '是';
+
+          if (!isActive) {
+            return { role: 'user', unit: unit || '', canViewAll: false, error: 'ACCOUNT_DISABLED' };
+          }
+
+          const isAdmin = isAdminRole(role, unit);
+          return {
+            role: isAdmin ? 'admin' : 'user',
+            unit: unit || '',
+            canViewAll: isAdmin,
+            name: searchName,
+            birthday: searchBirthday
+          };
+        }
+      }
+    }
+  }
+
+  const headers = staffSheet.getRange(2, 1, 1, staffSheet.getLastColumn()).getValues()[0];
+  const data = staffSheet.getRange(3, 1, staffSheet.getLastRow() - 2, headers.length).getValues();
+  const nameIdx = headers.indexOf('姓名');
+  const bdayIdx = headers.indexOf('生日');
+  const unitIdx = headers.indexOf('服務單位');
+  const roleIdx = headers.indexOf('角色');
+
+  for (let i = 0; i < data.length; i++) {
+    const rowName = normalizeText(data[i][nameIdx]);
+    const rowBirthday = normalizeDateValue(data[i][bdayIdx]);
+    if (rowName === nameKey && rowBirthday === birthdayKey) {
+      const role = String(data[i][roleIdx] || '').trim();
+      const unit = String(data[i][unitIdx] || '').trim();
+      const isAdmin = isAdminRole(role, unit);
+      return {
+        role: isAdmin ? 'admin' : 'user',
+        unit: unit || '',
+        canViewAll: isAdmin,
+        name: searchName,
+        birthday: searchBirthday
+      };
+    }
+  }
+
+  return { role: 'user', unit: '', canViewAll: false, error: 'NOT_FOUND' };
+}
+
 //查詢當年度參訓成績
 function searchAnnualResults(searchName, searchBirthday) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -79,21 +186,20 @@ function searchAnnualResults(searchName, searchBirthday) {
 }
 
 function searchData(searchName, searchBirthday) {
+  const access = getUserAccessProfile(searchName, searchBirthday);
+  if (access.error) return { error: access.error };
+
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getSheetByName("新北市在職清冊");
-  
+
   const lastRow = sheet.getLastRow();
   const lastCol = sheet.getLastColumn();
-  
-  // 取得第 2 列標題
+
   const headers = sheet.getRange(2, 1, 1, lastCol).getValues()[0];
-  
-  // 取得所有資料內容 (從第 3 列開始)
   const dataRange = sheet.getRange(3, 1, lastRow - 2, lastCol);
   const dataValues = dataRange.getValues();
-  const dataColors = dataRange.getFontColors(); // 取得所有儲存格的字體顏色
+  const dataColors = dataRange.getFontColors();
 
-  // 定義指定的顯示順序
   const displayOrder = [
     "師資統合獲證年度",
     "種子師資獲證年度",
@@ -111,43 +217,42 @@ function searchData(searchName, searchBirthday) {
 
   if (nameIdx === -1 || bdayIdx === -1) return { error: "找不到姓名或生日欄位" };
 
-  // 尋找符合的資料行索引
   let rowIndex = -1;
   for (let i = 0; i < dataValues.length; i++) {
-    const rowName = dataValues[i][nameIdx].toString().trim();
-    const rowBday = Utilities.formatDate(new Date(dataValues[i][bdayIdx]), "GMT+8", "yyyy-MM-dd");
-    
-    if (rowName === searchName && rowBday === searchBirthday) {
+    const rowName = normalizeText(dataValues[i][nameIdx]);
+    const rowBday = normalizeDateValue(dataValues[i][bdayIdx]);
+
+    if (rowName === normalizeText(searchName) && rowBday === normalizeDateValue(searchBirthday)) {
       rowIndex = i;
       break;
     }
   }
 
-  if (rowIndex !== -1) {
-    let output = [];
-    displayOrder.forEach(field => {
-      const colIdx = headers.indexOf(field);
-      if (colIdx !== -1) {
-        let value = dataValues[rowIndex][colIdx];
-        // 如果是日期物件，格式化為字串
-        if (value instanceof Date) {
-          value = Utilities.formatDate(value, "GMT+8", "yyyy-MM-dd");
-        }
-        
-        output.push({
-          label: field,
-          value: value || "",
-          color: dataColors[rowIndex][colIdx] // 抓取該單元格的字體顏色
-        });
+  if (rowIndex === -1) return null;
+
+  let output = [];
+  displayOrder.forEach(field => {
+    const colIdx = headers.indexOf(field);
+    if (colIdx !== -1) {
+      let value = dataValues[rowIndex][colIdx];
+      if (value instanceof Date) {
+        value = Utilities.formatDate(value, "GMT+8", "yyyy-MM-dd");
       }
-    });
-    return output;
-  } else {
-    return null;
-  }
+      output.push({
+        label: field,
+        value: value || "",
+        color: dataColors[rowIndex][colIdx]
+      });
+    }
+  });
+
+  return output;
 }
 
   function getUnitStaffList(searchName, searchBirthday) {
+    const access = getUserAccessProfile(searchName, searchBirthday);
+    if (access.error) return { error: access.error };
+
     const ss = SpreadsheetApp.getActive();
     const sheet = ss.getSheetByName("新北市在職清冊");
     const headers = sheet.getRange(2, 1, 1, sheet.getLastColumn()).getValues()[0];
@@ -156,34 +261,28 @@ function searchData(searchName, searchBirthday) {
     const nameIdx = headers.indexOf("姓名");
     const bdayIdx = headers.indexOf("生日");
     const unitIdx = headers.indexOf("服務單位");
-    const activeIdx = headers.indexOf("目前是否執行業務"); // 新增：定位執行業務欄位
+    const activeIdx = headers.indexOf("目前是否執行業務");
 
-    let unit = "";
-    let isActive = "";
+    const matchedRows = data.filter((row, i) => {
+      const rowName = normalizeText(row[nameIdx]);
+      const rowBday = normalizeDateValue(row[bdayIdx]);
+      const match = rowName === normalizeText(searchName) && rowBday === normalizeDateValue(searchBirthday);
+      return match;
+    });
 
-    // 尋找使用者本人
-    for (let i = 0; i < data.length; i++) {
-      const name = data[i][nameIdx];
-      const bday = Utilities.formatDate(new Date(data[i][bdayIdx]), "GMT+8", "yyyy-MM-dd");
+    if (!matchedRows.length) return { error: "NOT_FOUND" };
 
-      if (name === searchName && bday === searchBirthday) {
-        unit = data[i][unitIdx];
-        isActive = String(data[i][activeIdx]).trim(); // 取得執行狀態
-        break;
-      }
-    }
+    const row = matchedRows[0];
+    const unit = String(row[unitIdx] || '').trim();
+    const isActive = String(row[activeIdx] || '').trim();
 
-    if (!unit) return { error: "NOT_FOUND" }; // 查無此人
-    
-    // --- 關鍵檢查 ---
     if (isActive === "否") {
-      return { error: "NOT_ACTIVE" }; // 回傳特定狀態碼給前端
+      return { error: "NOT_ACTIVE" };
     }
 
-    // 撈同單位全部人 (原本的邏輯)
-    const result = data
-      .filter(r => r[unitIdx] === unit)
-      .map(r => {
+    let result = [];
+    if (access.canViewAll) {
+      result = data.map(r => {
         let obj = {};
         headers.forEach((h, idx) => {
           let v = r[idx];
@@ -194,8 +293,21 @@ function searchData(searchName, searchBirthday) {
         });
         return obj;
       });
+    } else {
+      result = [matchedRows[0]].map(r => {
+        let obj = {};
+        headers.forEach((h, idx) => {
+          let v = r[idx];
+          if (v instanceof Date) {
+            v = Utilities.formatDate(v, "GMT+8", "yyyy-MM-dd");
+          }
+          obj[h] = v;
+        });
+        return obj;
+      });
+    }
 
-    return { unit, list: result };
+    return { unit: access.canViewAll ? '全部單位' : unit, list: result, role: access.role, canViewAll: access.canViewAll };
   }
 
   function addEditCommentByName(unit, targetName, fieldName, newValue, requesterName) {
