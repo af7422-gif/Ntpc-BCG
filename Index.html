@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>新北市卡介苗工作人員管理系統</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
   <style>
     :root {
       color-scheme: light;
@@ -177,7 +178,7 @@
       border-radius: 9px;
       background: #fff;
       color: #48606d;
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 700;
     }
     .outline-button:hover { border-color: var(--teal); color: var(--teal-dark); }
@@ -197,37 +198,48 @@
     .search-input:focus { border-color: var(--teal); }
     .table-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; white-space: nowrap; }
-    th { padding: 15px 20px; background: #f7fafb; color: #7c8d99; text-align: left; font-size: 12px; font-weight: 800; letter-spacing: .04em; }
-    td { padding: 17px 20px; border-top: 1px solid #edf2f4; color: #425968; font-size: 14px; }
+    th { padding: 15px 20px; background: #f7fafb; color: #526a78; text-align: left; font-size: 14px; font-weight: 800; }
+    td { padding: 17px 20px; border-top: 1px solid #edf2f4; color: #425968; font-size: 16px; }
+    .sort-button { display: inline-flex; min-height: 28px; align-items: center; gap: 8px; padding: 0; border: 0; background: transparent; color: inherit; font-size: inherit; font-weight: inherit; text-align: left; }
+    .sort-button:hover, .sort-button:focus-visible { color: var(--teal-dark); }
+    .sort-indicator { color: var(--teal); font-size: 14px; }
     tbody tr:hover { background: #fbfdfd; }
     .person-cell { display: flex; align-items: center; gap: 10px; }
     .person-initial { display: grid; width: 32px; height: 32px; place-items: center; border-radius: 50%; background: #e8f3f2; color: var(--teal-dark); font-weight: 800; }
     .person-name { color: var(--ink); font-weight: 800; }
-    .person-unit { margin-top: 4px; color: var(--muted); font-size: 12px; }
-    .status { display: inline-flex; padding: 6px 10px; border-radius: 999px; background: #eaf6ef; color: #38865b; font-size: 12px; font-weight: 800; }
+    .person-unit { margin-top: 4px; color: var(--muted); font-size: 14px; }
+    .status { display: inline-flex; padding: 6px 10px; border-radius: 999px; background: #eaf6ef; color: #38865b; font-size: 14px; font-weight: 800; }
     .status.inactive { background: #fff0ef; color: #bd5550; }
     .row-actions { display: flex; gap: 7px; }
-    .small-action { padding: 8px 11px; border: 1px solid #dce9e9; border-radius: 7px; background: #fff; color: var(--teal-dark); font-size: 12px; font-weight: 700; }
+    .small-action { padding: 9px 12px; border: 1px solid #dce9e9; border-radius: 7px; background: #fff; color: var(--teal-dark); font-size: 14px; font-weight: 700; }
     .small-action:hover { background: var(--teal-light); }
     .empty-state { padding: 44px 18px; color: var(--muted); text-align: center; font-size: 13px; }
     .loading-line { padding: 18px; color: var(--muted); text-align: center; font-size: 12px; }
     .notice { margin-bottom: 18px; padding: 13px 15px; border: 1px solid #d9ebea; border-radius: 10px; background: #f1f9f8; color: #3e6870; font-size: 12px; line-height: 1.7; }
+    .notice.warning { border-color: #d7a13c; border-left: 5px solid #bd812d; background: #fff5e7; color: #694914; font-weight: 700; }
     .annual-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
     .annual-card { padding: 18px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
-    .annual-card h3 { margin: 0 0 14px; color: var(--teal-dark); font-size: 14px; }
-    .annual-row { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid #edf2f4; font-size: 12px; }
+    .annual-card h3 { margin: 0 0 14px; color: var(--teal-dark); font-size: 17px; }
+    .annual-row { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-top: 1px solid #edf2f4; font-size: 15px; }
     .annual-row span:first-child { color: var(--muted); }
     .annual-row span:last-child { text-align: right; font-weight: 700; }
     .modal-backdrop { position: fixed; z-index: 20; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(18,39,49,.48); }
+    .modal-backdrop.modal-layer { z-index: 21; background: rgba(18,39,49,.3); }
     .modal { width: min(100%, 720px); max-height: min(90vh, 850px); overflow: auto; border-radius: 15px; background: #fff; box-shadow: 0 25px 80px rgba(0,0,0,.2); }
     .modal-head { position: sticky; z-index: 1; top: 0; display: flex; align-items: center; justify-content: space-between; padding: 18px 21px; border-bottom: 1px solid var(--line); background: #fff; }
     .modal-head h2 { margin: 0; font-size: 16px; }
     .close-button { width: 34px; height: 34px; border: 0; border-radius: 50%; background: #f2f6f7; color: #586c77; font-size: 20px; }
-    .modal-body { padding: 20px; }
-    .detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 20px; }
-    .detail-item { padding: 12px 0; border-bottom: 1px solid #edf2f4; }
-    .detail-label { color: var(--muted); font-size: 10px; }
-    .detail-value { margin-top: 5px; font-size: 13px; font-weight: 700; overflow-wrap: anywhere; }
+    .modal-body { padding: 20px; background: #f4f7f8; }
+    .detail-section { overflow: hidden; border: 1px solid #dce6e8; border-radius: 12px; background: #fff; box-shadow: 0 2px 6px rgba(25, 58, 68, .04); }
+    .detail-section + .detail-section { margin-top: 14px; }
+    .detail-section h3 { margin: 0; padding: 12px 16px; border-bottom: 1px solid #dce9e9; border-left: 4px solid var(--teal); background: #eaf4f3; color: #155c60; font-size: 15px; font-weight: 800; }
+    .detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; padding: 14px; }
+    .detail-item { min-width: 0; padding: 10px 12px; border: 1px solid #e5ecee; border-radius: 8px; background: #fbfcfd; }
+    .detail-label { color: #5b707b; font-size: 12px; font-weight: 700; line-height: 1.5; }
+    .detail-value { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 5px; color: #183b45; font-size: 15px; font-weight: 700; line-height: 1.6; }
+    .detail-value-text { min-width: 0; overflow-wrap: anywhere; }
+    .detail-edit-button { flex: 0 0 auto; padding: 5px 8px; border: 1px solid #c9dfdc; border-radius: 7px; background: #fff; color: #155c60; font-size: 12px; font-weight: 700; }
+    .detail-edit-button:hover { background: #eaf4f3; }
     .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
     .form-grid .field { margin: 9px 0; }
     .form-grid .field input, .form-grid .field select { height: 43px; }
@@ -267,6 +279,10 @@
       .table-tools { width: 100%; }
       .search-input { width: 100%; }
       .annual-grid, .detail-grid, .form-grid { grid-template-columns: 1fr; }
+      .modal-backdrop { padding: 10px; }
+      .modal-body { padding: 12px; }
+      .detail-grid { gap: 8px; padding: 10px; }
+      .detail-item { padding: 9px 10px; }
       .login-intro { min-height: 225px; padding: 22px; }
       .intro-copy { margin-top: 28px; }
     }
@@ -275,7 +291,7 @@
 <body>
   <main id="loginScreen" class="login-screen">
     <section class="login-intro" aria-label="系統介紹">
-      <div class="intro-brand"><span class="brand-symbol" aria-hidden="true">✚</span><span>新北市衛生局 · BCG</span></div>
+      <div class="intro-brand"><span class="brand-symbol" aria-hidden="true"><i class="fa-solid fa-syringe"></i></span><span>新北市衛生局 · BCG</span></div>
       <div class="intro-copy">
         <div class="intro-eyebrow">STAFF INFORMATION SYSTEM</div>
         <h1>卡介苗工作人員<br>資訊管理系統</h1>
@@ -297,62 +313,67 @@
         </div>
         <button id="loginButton" class="primary-button login-submit" type="submit">登入</button>
         <p id="loginMessage" class="login-message" role="status" aria-live="polite"></p>
-        <div class="login-note">登入後可查詢個人資料。管理者可依權限查看人員清冊；一般使用者僅能查看本人資料。</div>
+        <div class="login-note">登入後可查詢個人資料。管理者可依權限查看人員清冊；一般人員可瀏覽同服務單位名冊，身分證號僅本人可查看。</div>
       </form>
     </section>
   </main>
 
   <div id="appShell" class="app-shell hidden">
     <header class="topbar">
-      <div class="topbar-brand"><span class="brand-symbol" aria-hidden="true">✚</span><span>卡介苗工作人員管理系統</span></div>
+      <div class="topbar-brand"><span class="brand-symbol" aria-hidden="true"><i class="fa-solid fa-syringe"></i></span><span>卡介苗工作人員管理系統</span></div>
       <div class="topbar-right">
         <span id="roleTag" class="role-tag">一般人員</span>
         <div class="user-chip">
           <span id="userAvatar" class="avatar">用</span>
           <div><div id="userNameLabel" class="user-chip-name"></div><div id="userUnitLabel" class="user-chip-unit"></div></div>
         </div>
-        <button id="logoutButton" class="text-button" type="button">登出</button>
+        <button id="logoutButton" class="text-button" type="button"><i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i> 登出</button>
       </div>
     </header>
 
     <div class="workspace">
       <aside class="sidebar">
-        <p class="side-caption">工作區</p>
         <nav class="nav-list" aria-label="主要導覽">
-          <button class="nav-button active" type="button" data-view="overview"><span class="nav-icon">▦</span>人員總覽</button>
-          <button class="nav-button" type="button" data-view="annual"><span class="nav-icon">▤</span>年度訓練成績</button>
-          <button class="nav-button" type="button" data-view="maintenance"><span class="nav-icon">♧</span>資料維護</button>
+          <button class="nav-button active" type="button" data-view="overview"><span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-address-book"></i></span>名冊瀏覽及維護</button>
+          <button class="nav-button" type="button" data-view="annual"><span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-award"></i></span>年度訓練成績</button>
         </nav>
         <div class="side-help">
           <strong>訓練資料說明</strong>
           <p>查看訓練項目與成績定義。</p>
-          <a href="https://drive.google.com/file/d/1P9NOM4qsF_IGH6hxx1ddNzlwg1atZ_2_/view?usp=drive_link" target="_blank" rel="noopener noreferrer">開啟各項訓練定義說明 ↗</a>
+          <a href="https://drive.google.com/file/d/1P9NOM4qsF_IGH6hxx1ddNzlwg1atZ_2_/view?usp=drive_link" target="_blank" rel="noopener noreferrer">開啟各項訓練定義說明 <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
         </div>
       </aside>
 
       <main class="main-content">
         <section id="overviewView" class="app-view">
           <div class="page-heading">
-            <div><div class="eyebrow">STAFF DIRECTORY</div><h1>工作人員總覽</h1><p id="welcomeText">檢視目前可存取的工作人員資料。</p></div>
+            <div><div class="eyebrow">STAFF DIRECTORY</div><h1>名冊瀏覽及維護</h1></div>
             <div class="heading-actions">
-              <button id="annualShortcut" class="outline-button" type="button">查看年度成績</button>
-              <button id="exportButton" class="outline-button" type="button">匯出 Excel</button>
+              <button id="addStaffButton" class="primary-button" type="button"><i class="fa-solid fa-user-plus" aria-hidden="true"></i> 新增工作人員申請</button>
+              <button id="exportButton" class="outline-button" type="button"><i class="fa-solid fa-file-export" aria-hidden="true"></i> 匯出 Excel</button>
             </div>
           </div>
           <div id="noticeBox" class="notice hidden"></div>
           <div class="stats-grid">
-            <article class="stat-card"><div class="stat-icon">♙</div><div><div class="stat-label">可檢視人員</div><div id="totalCount" class="stat-value">—</div></div></article>
-            <article class="stat-card"><div class="stat-icon gold">✓</div><div><div class="stat-label">執行業務中</div><div id="activeCount" class="stat-value">—</div></div></article>
-            <article class="stat-card"><div class="stat-icon blue">▤</div><div><div class="stat-label">已登記技術評價</div><div id="skillCount" class="stat-value">—</div></div></article>
+            <article class="stat-card"><div class="stat-icon" aria-hidden="true"><i class="fa-solid fa-users"></i></div><div><div class="stat-label">可檢視人員</div><div id="totalCount" class="stat-value">—</div></div></article>
+            <article class="stat-card"><div class="stat-icon gold" aria-hidden="true"><i class="fa-solid fa-user-check"></i></div><div><div class="stat-label">執行業務中</div><div id="activeCount" class="stat-value">—</div></div></article>
+            <article class="stat-card"><div class="stat-icon blue" aria-hidden="true"><i class="fa-solid fa-certificate"></i></div><div><div class="stat-label">已登記技術評價</div><div id="skillCount" class="stat-value">—</div></div></article>
           </div>
+          <div class="notice">送出的變更會以申請方式通知承辦人，不會直接修改清冊內容。</div>
           <section class="panel">
             <div class="panel-head">
-              <div><h2>工作人員資料清冊</h2><p id="tableScope">依您的帳號權限顯示</p></div>
+              <div><h2>工作人員資料清冊</h2></div>
               <div class="table-tools"><input id="directorySearch" class="search-input" type="search" placeholder="搜尋姓名或服務單位" aria-label="搜尋姓名或服務單位"></div>
             </div>
             <div class="table-wrap">
-              <table>
-                <thead><tr><th>工作人員</th><th>技術評價</th><th>初訓證照</th><th>業務狀態</th><th>功能</th></tr></thead>
+              <table id="staffTable">
+                <thead><tr>
+                  <th scope="col" aria-sort="none"><button class="sort-button" type="button" data-sort-table="overview" data-sort-key="姓名">工作人員 <span class="sort-indicator" aria-hidden="true"><i class="fa-solid fa-sort"></i></span></button></th>
+                  <th scope="col" aria-sort="none"><button class="sort-button" type="button" data-sort-table="overview" data-sort-key="技術評價獲證年度">技術評價 <span class="sort-indicator" aria-hidden="true"><i class="fa-solid fa-sort"></i></span></button></th>
+                  <th scope="col" aria-sort="none"><button class="sort-button" type="button" data-sort-table="overview" data-sort-key="初訓獲證年度">初訓證照 <span class="sort-indicator" aria-hidden="true"><i class="fa-solid fa-sort"></i></span></button></th>
+                  <th scope="col" aria-sort="none"><button class="sort-button" type="button" data-sort-table="overview" data-sort-key="目前是否執行業務">業務狀態 <span class="sort-indicator" aria-hidden="true"><i class="fa-solid fa-sort"></i></span></button></th>
+                  <th scope="col">功能</th>
+                </tr></thead>
                 <tbody id="staffTableBody"><tr><td colspan="5" class="loading-line">正在載入資料…</td></tr></tbody>
               </table>
             </div>
@@ -362,24 +383,11 @@
         <section id="annualView" class="app-view hidden">
           <div class="page-heading">
             <div><div class="eyebrow">TRAINING RESULTS</div><h1>年度訓練成績</h1><p>查看登入者的年度參訓成績與合格紀錄。</p></div>
-            <div class="heading-actions"><button id="annualRefreshButton" class="outline-button" type="button">重新查詢</button></div>
+            <div class="heading-actions"><button id="annualRefreshButton" class="outline-button" type="button"><i class="fa-solid fa-rotate" aria-hidden="true"></i> 重新查詢</button></div>
           </div>
           <div id="annualContent" class="annual-grid"><div class="panel empty-state">選取「年度訓練成績」以載入資料。</div></div>
         </section>
 
-        <section id="maintenanceView" class="app-view hidden">
-          <div class="page-heading">
-            <div><div class="eyebrow">DATA MAINTENANCE</div><h1>資料維護</h1><p id="maintenanceDescription">提出工作人員資料新增或修改申請。</p></div>
-            <div class="heading-actions"><button id="addStaffButton" class="primary-button" type="button">＋ 新增工作人員申請</button></div>
-          </div>
-          <div class="notice">一般使用者送出的變更會以申請方式通知承辦人，不會直接修改清冊內容。</div>
-          <section class="panel">
-            <div class="panel-head"><div><h2>可申請修改的資料</h2><p>選擇人員後，針對欄位提交修改建議。</p></div></div>
-            <div class="table-wrap">
-              <table><thead><tr><th>工作人員</th><th>服務單位</th><th>目前業務狀態</th><th>操作</th></tr></thead><tbody id="maintenanceTableBody"></tbody></table>
-            </div>
-          </section>
-        </section>
       </main>
     </div>
   </div>
@@ -396,6 +404,11 @@
         user: null,
         profile: null,
         staff: [],
+        annualResults: null,
+        annualResultsLoaded: false,
+        tableSort: {
+          overview: { key: '', direction: 1 }
+        },
         currentView: 'overview',
         toastTimer: null
       };
@@ -436,20 +449,15 @@
       function enterApp(profile, name, birthday) {
         state.profile = profile;
         state.user = { name, birthday, unit: profile.unit || '' };
+        state.annualResults = null;
+        state.annualResultsLoaded = false;
         $('#loginScreen').classList.add('hidden');
         $('#appShell').classList.remove('hidden');
         $('#roleTag').textContent = isAdmin() ? '管理者' : '一般人員';
         $('#userNameLabel').textContent = name;
         $('#userUnitLabel').textContent = state.user.unit || (isAdmin() ? '全部單位' : '服務單位未設定');
         $('#userAvatar').textContent = name.charAt(0) || '用';
-        $('#welcomeText').textContent = isAdmin()
-          ? '管理者可檢視全體工作人員資料。'
-          : '您目前僅能檢視自己的工作人員資料。';
-        $('#tableScope').textContent = isAdmin() ? '管理者權限 · 全體人員清冊' : '一般使用者權限 · 僅顯示本人資料';
-        $('#maintenanceDescription').textContent = isAdmin()
-          ? '管理者可檢視全體清冊，並提出新增或修改申請。'
-          : '提出本人資料的新增或修改申請。';
-        $('#exportButton').classList.toggle('hidden', !isAdmin());
+        $('#exportButton').classList.remove('hidden');
         $('#addStaffButton').classList.toggle('hidden', !isAdmin());
         loadDirectory();
       }
@@ -490,7 +498,6 @@
 
       function loadDirectory() {
         $('#staffTableBody').innerHTML = '<tr><td colspan="5" class="loading-line">正在載入資料…</td></tr>';
-        $('#maintenanceTableBody').innerHTML = '<tr><td colspan="4" class="loading-line">正在載入資料…</td></tr>';
         google.script.run
           .withSuccessHandler(response => {
             if (!response || response.error) {
@@ -500,7 +507,9 @@
             }
             state.staff = Array.isArray(response.list) ? response.list.map(normalizeRow) : [];
             if (response.unit) state.user.unit = response.unit === '全部單位' ? state.profile.unit : response.unit;
-            $('#userUnitLabel').textContent = state.profile.unit || (isAdmin() ? '全部單位' : '服務單位未設定');
+            $('#userUnitLabel').textContent = isAdmin()
+              ? state.profile.unit || '全部單位'
+              : state.user.unit || '服務單位未設定';
             renderDirectory();
           })
           .withFailureHandler(error => {
@@ -515,12 +524,13 @@
           ? '目前帳號標記為未執行業務，無法載入資料清冊。'
           : `無法載入資料清冊${error ? `（${error}）` : ''}。請稍後重試或聯絡管理人員。`;
         $('#staffTableBody').innerHTML = `<tr><td colspan="5" class="empty-state">${escapeHtml(message)}</td></tr>`;
-        $('#maintenanceTableBody').innerHTML = `<tr><td colspan="4" class="empty-state">${escapeHtml(message)}</td></tr>`;
         $('#totalCount').textContent = '0';
         $('#activeCount').textContent = '0';
         $('#skillCount').textContent = '0';
-        $('#noticeBox').textContent = message;
-        $('#noticeBox').classList.remove('hidden');
+        const noticeBox = $('#noticeBox');
+        noticeBox.textContent = message;
+        noticeBox.classList.toggle('warning', error === 'NOT_ACTIVE');
+        noticeBox.classList.remove('hidden');
       }
 
       function renderDirectory() {
@@ -530,17 +540,63 @@
         $('#activeCount').textContent = String(activeCount);
         $('#skillCount').textContent = String(skillCount);
         $('#noticeBox').classList.add('hidden');
+        $('#noticeBox').classList.remove('warning');
         renderStaffTable(state.staff);
-        renderMaintenanceTable();
+      }
+
+      function sortRows(rows, tableName) {
+        const { key, direction } = state.tableSort[tableName];
+        if (!key) return rows;
+        return [...rows].sort((left, right) => {
+          const leftValue = left[key] == null ? '' : String(left[key]).trim();
+          const rightValue = right[key] == null ? '' : String(right[key]).trim();
+          if (!leftValue || !rightValue) return leftValue ? -1 : rightValue ? 1 : 0;
+          return leftValue.localeCompare(rightValue, 'zh-Hant', { numeric: true, sensitivity: 'base' }) * direction;
+        });
+      }
+
+      function updateSortIndicators(tableName) {
+        const sort = state.tableSort[tableName];
+        document.querySelectorAll(`.sort-button[data-sort-table="${tableName}"]`).forEach(button => {
+          const active = button.dataset.sortKey === sort.key;
+          const direction = active ? (sort.direction === 1 ? 'ascending' : 'descending') : 'none';
+          button.closest('th').setAttribute('aria-sort', direction);
+          button.querySelector('.sort-indicator i').className = `fa-solid ${active
+            ? (sort.direction === 1 ? 'fa-sort-up' : 'fa-sort-down')
+            : 'fa-sort'}`;
+          button.setAttribute('aria-label', `${button.textContent.trim().replace(/[↕↑↓]/g, '').trim()}${active && sort.direction === 1 ? '，目前升冪，點擊改為降冪' : '，點擊依此欄位升冪排序'}`);
+        });
+      }
+
+      function changeTableSort(tableName, key) {
+        const sort = state.tableSort[tableName];
+        if (sort.key === key) {
+          sort.direction *= -1;
+        } else {
+          sort.key = key;
+          sort.direction = 1;
+        }
+        updateSortIndicators(tableName);
+        renderStaffTable(getDirectoryRows());
+      }
+
+      function getDirectoryRows() {
+        const query = $('#directorySearch').value.trim().toLowerCase();
+        return state.staff.filter(row =>
+          String(row['姓名'] || '').toLowerCase().includes(query) ||
+          String(row['服務單位'] || '').toLowerCase().includes(query)
+        );
       }
 
       function renderStaffTable(rows) {
+        rows = sortRows(rows, 'overview');
         const tbody = $('#staffTableBody');
         if (!rows.length) {
           tbody.innerHTML = '<tr><td colspan="5" class="empty-state">目前沒有可顯示的工作人員資料。</td></tr>';
           return;
         }
-        tbody.innerHTML = rows.map((row, index) => {
+        tbody.innerHTML = rows.map(row => {
+          const index = state.staff.indexOf(row);
           const name = escapeHtml(row['姓名']);
           const unit = escapeHtml(row['服務單位']);
           const inactive = row['目前是否執行業務'] === '否';
@@ -549,30 +605,18 @@
             <td>${escapeHtml(text(row['技術評價獲證年度']))}</td>
             <td>${escapeHtml(text(row['初訓獲證年度']))}</td>
             <td><span class="status${inactive ? ' inactive' : ''}">${inactive ? '未執行' : '執行中'}</span></td>
-            <td><div class="row-actions"><button class="small-action" type="button" data-action="detail" data-index="${index}">檢視資料</button></div></td>
+            <td><div class="row-actions"><button class="small-action" type="button" data-action="detail" data-index="${index}"><i class="fa-solid fa-eye" aria-hidden="true"></i> 檢視資料</button></div></td>
           </tr>`;
         }).join('');
       }
 
-      function renderMaintenanceTable() {
-        const tbody = $('#maintenanceTableBody');
-        if (!state.staff.length) {
-          tbody.innerHTML = '<tr><td colspan="4" class="empty-state">目前沒有可維護的資料。</td></tr>';
-          return;
+      function openModal(title, content, footer = '', preservePrevious = false) {
+        const modal = `<div class="modal-backdrop${preservePrevious ? ' modal-layer' : ''}"><section class="modal" role="dialog" aria-modal="true" aria-label="${escapeHtml(title)}"><header class="modal-head"><h2>${escapeHtml(title)}</h2><button class="close-button" type="button" data-dismiss="true" aria-label="關閉"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button></header><div class="modal-body">${content}</div>${footer ? `<footer class="modal-foot">${footer}</footer>` : ''}</section></div>`;
+        if (preservePrevious) {
+          $('#modalRoot').insertAdjacentHTML('beforeend', modal);
+        } else {
+          $('#modalRoot').innerHTML = modal;
         }
-        tbody.innerHTML = state.staff.map((row, index) => {
-          const inactive = row['目前是否執行業務'] === '否';
-          return `<tr>
-            <td><div class="person-cell"><span class="person-initial">${escapeHtml((row['姓名'] || '用').charAt(0))}</span><span class="person-name">${escapeHtml(row['姓名'] || '未提供姓名')}</span></div></td>
-            <td>${escapeHtml(row['服務單位'] || '未設定單位')}</td>
-            <td><span class="status${inactive ? ' inactive' : ''}">${inactive ? '未執行' : '執行中'}</span></td>
-            <td><button class="small-action" type="button" data-action="edit" data-index="${index}">申請修改</button></td>
-          </tr>`;
-        }).join('');
-      }
-
-      function openModal(title, content, footer = '') {
-        $('#modalRoot').innerHTML = `<div class="modal-backdrop" data-dismiss="true"><section class="modal" role="dialog" aria-modal="true" aria-label="${escapeHtml(title)}"><header class="modal-head"><h2>${escapeHtml(title)}</h2><button class="close-button" type="button" data-dismiss="true" aria-label="關閉">×</button></header><div class="modal-body">${content}</div>${footer ? `<footer class="modal-foot">${footer}</footer>` : ''}</section></div>`;
         document.body.style.overflow = 'hidden';
       }
 
@@ -581,38 +625,85 @@
         document.body.style.overflow = '';
       }
 
-      function showDetails(row) {
-        const fields = [
-          '服務單位', '姓名', '生日', '師資統合獲證年度', '種子師資獲證年度',
-          '最近一次帶初訓日', '技術評價獲證年度', '初訓獲證年度',
-          '目前是否執行業務', '未執行業務原因', '師資年限', '施打年限',
-          '檢核', '建議參訓項目'
-        ];
-        const content = '<div id="detailContent" class="detail-grid"><div class="loading-line">正在載入詳細資料…</div></div>';
-        const footer = '<button class="outline-button" type="button" data-dismiss="true">關閉</button>';
-        openModal(`${row['姓名'] || '工作人員'}｜資料明細`, content, footer);
-        google.script.run
-          .withSuccessHandler(result => {
-            if (!result) {
-              $('#detailContent').innerHTML = '<div class="empty-state">查無詳細資料。</div>';
-              return;
-            }
-            $('#detailContent').innerHTML = fields.map(field =>
-              `<div class="detail-item"><div class="detail-label">${escapeHtml(field)}</div><div class="detail-value">${escapeHtml(text(result[field]))}</div></div>`
-            ).join('');
-          })
-          .withFailureHandler(error => {
-            $('#detailContent').innerHTML = `<div class="empty-state">載入失敗：${escapeHtml(error && error.message ? error.message : error)}</div>`;
-          })
-          .getStaffDetail(row['姓名'], row['生日']);
+      function closeTopModal() {
+        const modals = $('#modalRoot').querySelectorAll('.modal-backdrop');
+        if (modals.length > 1) {
+          modals[modals.length - 1].remove();
+          return;
+        }
+        closeModal();
       }
 
-      function loadAnnualResults() {
+      function formatBirthday(value) {
+        return String(value == null ? '' : value).replace(/^(\d{4})-(\d{2})-(\d{2})$/, '$1/$2/$3');
+      }
+
+      function showDetails(row) {
+        const rowIndex = state.staff.indexOf(row);
+        const sections = [
+          ['基本資料', [
+            ['服務單位', '服務單位'],
+            ['姓名', '姓名'],
+            ['生日', '生日'],
+            ['身分證號', row['身分證號'] ? '身分證號' : '身分證字號']
+          ]],
+          ['聯絡資料', [
+            ['聯絡電話', '聯絡電話'],
+            ['E-MAIL', 'E-Mail']
+          ]],
+          ['證書資料', [
+            ['初訓獲證年度', '初訓獲證年度'],
+            ['技術評價獲證年度', '技術評價獲證年度'],
+            ['種子師資獲證年度', '種子師資獲證年度'],
+            ['師資統合獲證年度', '師資統合獲證年度'],
+            ['最近一次帶初訓日', '最近一次帶初訓日']
+          ]],
+          ['執業資料', [
+            ['目前是否執行業務', '目前是否執行業務'],
+            ['未執行業務原因', '未執行業務原因']
+          ]],
+          ['檢核資料', [
+            ['師資年限', '師資年限'],
+            ['施打年限', '施打年限'],
+            ['檢核', '檢核'],
+            ['建議參訓項目', '建議參訓項目']
+          ]]
+        ];
+        const content = sections.map(([title, fields]) =>
+          `<section class="detail-section"><h3>${escapeHtml(title)}</h3><div class="detail-grid">${fields.map(([label, field]) => {
+            const value = field === '生日' ? formatBirthday(row[field]) : row[field];
+            const editButton = editableFields[field]
+              ? `<button class="detail-edit-button" type="button" data-row-index="${rowIndex}" data-edit-field="${escapeHtml(field)}" aria-label="申請修改${escapeHtml(label)}"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> 申請修改</button>`
+              : '';
+            return `<div class="detail-item"><div class="detail-label">${escapeHtml(label)}</div><div class="detail-value"><span class="detail-value-text">${escapeHtml(text(value))}</span>${editButton}</div></div>`;
+          }).join('')}</div></section>`
+        ).join('');
+        const footer = '<button class="outline-button" type="button" data-dismiss="true">關閉</button>';
+        openModal(`${row['姓名'] || '工作人員'}｜資料明細`, content, footer);
+      }
+
+      function loadAnnualResults(forceRefresh = false) {
+        if (state.annualResultsLoaded && !forceRefresh) {
+          renderAnnualResults(state.annualResults);
+          return;
+        }
         const content = $('#annualContent');
         content.innerHTML = '<div class="panel empty-state">正在載入年度訓練成績…</div>';
         google.script.run
           .withSuccessHandler(result => {
-            if (!result) {
+            state.annualResults = result;
+            state.annualResultsLoaded = true;
+            renderAnnualResults(result);
+          })
+          .withFailureHandler(error => {
+            content.innerHTML = `<div class="panel empty-state">成績載入失敗：${escapeHtml(error && error.message ? error.message : error)}</div>`;
+          })
+          .searchAnnualResults(state.user.name, state.user.birthday);
+      }
+
+      function renderAnnualResults(result) {
+        const content = $('#annualContent');
+        if (!result) {
               content.innerHTML = '<div class="panel empty-state">目前查無年度訓練成績。</div>';
               return;
             }
@@ -631,16 +722,13 @@
                 return `<div class="annual-row"><span>${escapeHtml(label)}</span><span>${escapeHtml(text(value))}</span></div>`;
               }).join('')}</article>`
             ).join('');
-          })
-          .withFailureHandler(error => {
-            content.innerHTML = `<div class="panel empty-state">成績載入失敗：${escapeHtml(error && error.message ? error.message : error)}</div>`;
-          })
-          .searchAnnualResults(state.user.name, state.user.birthday);
       }
 
       const editableFields = {
         '姓名': { type: 'text' },
         '生日': { type: 'date' },
+        '聯絡電話': { type: 'tel' },
+        'E-Mail': { type: 'text' },
         '師資統合獲證年度': { type: 'number' },
         '種子師資獲證年度': { type: 'number' },
         '最近一次帶初訓日': { type: 'date' },
@@ -650,25 +738,19 @@
         '未執行業務原因': { type: 'text' }
       };
 
-      function requestEdit(row) {
-        const fields = Object.keys(editableFields);
-        const content = `<p class="subtext">修改對象：<strong>${escapeHtml(row['姓名'])}</strong></p><div class="field"><label for="editField">修改欄位</label><select id="editField">${fields.map(field => `<option value="${escapeHtml(field)}">${escapeHtml(field)}</option>`).join('')}</select></div><div id="editValueContainer" class="field"></div>`;
+      function requestEdit(row, field) {
+        const config = editableFields[field];
+        if (!config) {
+          notify('此欄位不開放修改申請。', true);
+          return;
+        }
+        const input = config.type === 'select'
+          ? `<select id="editValue"><option value="是" ${row[field] === '是' ? 'selected' : ''}>是</option><option value="否" ${row[field] === '否' ? 'selected' : ''}>否</option></select>`
+          : `<input id="editValue" type="${config.type}" value="${escapeHtml(row[field] || '')}">`;
+        const content = `<p class="subtext">修改對象：<strong>${escapeHtml(row['姓名'])}</strong></p><div class="field"><label for="editValue">修改欄位：${escapeHtml(field)}</label>${input}</div>`;
         const footer = '<button class="outline-button" type="button" data-dismiss="true">取消</button><button id="submitEditButton" class="primary-button" type="button">送出修改申請</button>';
-        openModal('申請修改工作人員資料', content, footer);
-        const fieldSelect = $('#editField');
-        const renderInput = () => {
-          const field = fieldSelect.value;
-          const config = editableFields[field];
-          const value = row[field] || '';
-          const input = config.type === 'select'
-            ? `<select id="editValue"><option value="是" ${value === '是' ? 'selected' : ''}>是</option><option value="否" ${value === '否' ? 'selected' : ''}>否</option></select>`
-            : `<input id="editValue" type="${config.type}" value="${escapeHtml(value)}">`;
-          $('#editValueContainer').innerHTML = `<label for="editValue">新資料</label>${input}`;
-        };
-        fieldSelect.addEventListener('change', renderInput);
-        renderInput();
+        openModal('申請修改工作人員資料', content, footer, true);
         $('#submitEditButton').addEventListener('click', () => {
-          const field = fieldSelect.value;
           const value = $('#editValue').value.trim();
           if (!value) {
             notify('請輸入修改內容。', true);
@@ -679,7 +761,7 @@
           button.textContent = '送出中…';
           google.script.run
             .withSuccessHandler(result => {
-              closeModal();
+              closeTopModal();
               if (result === false) {
                 notify('找不到對應人員資料，申請未送出。', true);
                 return;
@@ -753,12 +835,30 @@
           notify('Excel 匯出元件載入失敗，請重新整理後再試。', true);
           return;
         }
-        const columns = ['服務單位', '姓名', '生日', '師資統合獲證年度', '種子師資獲證年度', '最近一次帶初訓日', '技術評價獲證年度', '初訓獲證年度', '目前是否執行業務', '未執行業務原因'];
+        const columns = [
+          '服務單位', '姓名', ...(isAdmin() ? ['身分證字號'] : []), '生日', '聯絡電話', 'E-Mail',
+          '師資統合獲證年度', '種子師資獲證年度', '最近一次帶初訓日',
+          '技術評價獲證年度', '技術評價\n (皮內注射)\n 獲證年度', '初訓獲證年度',
+          'TST獲證年\n (部分縣市特有)', '目前是否執行業務', '未執行業務原因'
+        ];
         try {
-          const rows = state.staff.map(row => columns.map(column => row[column] == null ? '' : row[column]));
-          const sheet = window.XLSX.utils.aoa_to_sheet([columns, ...rows]);
+          const normalizeHeader = header => String(header || '').replace(/\s+/g, '').toLowerCase();
+          const sourceHeaders = Object.keys(state.staff[0]);
+          const sourceHeaderMap = new Map(sourceHeaders.map(header => [normalizeHeader(header), header]));
+          const rows = state.staff.map(row => columns.map(column => {
+            const sourceHeader = sourceHeaderMap.get(normalizeHeader(column));
+            const value = sourceHeader && row[sourceHeader] != null ? row[sourceHeader] : '';
+            return normalizeHeader(column) === '生日' ? formatBirthday(value) : value;
+          }));
+          const rocData = [columns, ...rows];
+          const gregorianData = rocData.map((row, rowIndex) => row.map((value, columnIndex) => {
+            if (rowIndex === 0 || !columns[columnIndex].includes('年度') || value === '') return value;
+            const rocYear = Number(value);
+            return Number.isFinite(rocYear) ? rocYear + 1911 : value;
+          }));
           const workbook = window.XLSX.utils.book_new();
-          window.XLSX.utils.book_append_sheet(workbook, sheet, '工作人員清單');
+          window.XLSX.utils.book_append_sheet(workbook, window.XLSX.utils.aoa_to_sheet(rocData), '民國年檢視');
+          window.XLSX.utils.book_append_sheet(workbook, window.XLSX.utils.aoa_to_sheet(gregorianData), '西元年檢視');
           window.XLSX.writeFile(workbook, `工作人員清單_${new Date().toISOString().slice(0, 10)}.xlsx`);
         } catch (error) {
           notify(`Excel 匯出失敗：${error && error.message ? error.message : error}`, true);
@@ -779,31 +879,34 @@
       document.querySelectorAll('.nav-button').forEach(button => {
         button.addEventListener('click', () => setView(button.dataset.view));
       });
-      $('#annualShortcut').addEventListener('click', () => setView('annual'));
-      $('#annualRefreshButton').addEventListener('click', loadAnnualResults);
+      $('#annualRefreshButton').addEventListener('click', () => loadAnnualResults(true));
       $('#addStaffButton').addEventListener('click', requestAddStaff);
       $('#exportButton').addEventListener('click', exportStaff);
       $('#directorySearch').addEventListener('input', event => {
-        const query = event.target.value.trim().toLowerCase();
-        const matches = state.staff.filter(row =>
-          String(row['姓名'] || '').toLowerCase().includes(query) ||
-          String(row['服務單位'] || '').toLowerCase().includes(query)
-        );
-        renderStaffTable(matches);
+        renderStaffTable(getDirectoryRows());
+      });
+      document.querySelectorAll('.sort-button').forEach(button => {
+        button.addEventListener('click', () => changeTableSort(button.dataset.sortTable, button.dataset.sortKey));
       });
       $('#staffTableBody').addEventListener('click', event => {
-        const button = event.target.closest('[data-action="detail"]');
-        if (button) showDetails(state.staff[Number(button.dataset.index)]);
-      });
-      $('#maintenanceTableBody').addEventListener('click', event => {
-        const button = event.target.closest('[data-action="edit"]');
-        if (button) requestEdit(state.staff[Number(button.dataset.index)]);
+        const button = event.target.closest('[data-action]');
+        if (!button) return;
+        const row = state.staff[Number(button.dataset.index)];
+        if (!row) return;
+        if (button.dataset.action === 'detail') showDetails(row);
       });
       $('#modalRoot').addEventListener('click', event => {
-        if (event.target.dataset.dismiss === 'true') closeModal();
+        const editButton = event.target.closest('button[data-edit-field]');
+        if (editButton) {
+          const row = state.staff[Number(editButton.dataset.rowIndex)];
+          if (row) requestEdit(row, editButton.dataset.editField);
+          return;
+        }
+        const closeButton = event.target.closest('button[data-dismiss="true"]');
+        if (closeButton) closeTopModal();
       });
       document.addEventListener('keydown', event => {
-        if (event.key === 'Escape' && !$('#modalRoot').classList.contains('hidden')) closeModal();
+        if (event.key === 'Escape' && $('#modalRoot').querySelector('.modal-backdrop')) closeTopModal();
       });
       $('#logoutButton').addEventListener('click', () => {
         state.user = null;

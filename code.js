@@ -123,34 +123,33 @@ function searchAnnualResults(searchName, searchBirthday) {
   const lastRow = sheet.getLastRow();
   const lastCol = sheet.getLastColumn();
   
-  // 1. 取得標題、內容與「字體顏色」
   const headers = sheet.getRange(2, 1, 1, lastCol).getValues()[0];
-  const dataRange = sheet.getRange(3, 1, lastRow - 2, lastCol);
-  const dataValues = dataRange.getValues();
-  const dataColors = dataRange.getFontColors(); // 新增這行來抓取顏色
-
   const nameIdx = headers.indexOf("姓名");
   const bdayIdx = headers.indexOf("生日");
   
   if (nameIdx === -1 || bdayIdx === -1) return { error: "找不到姓名或生日欄位" };
+  const rowCount = lastRow - 2;
+  if (rowCount <= 0) return null;
+
+  const names = sheet.getRange(3, nameIdx + 1, rowCount, 1).getValues();
+  const birthdays = sheet.getRange(3, bdayIdx + 1, rowCount, 1).getValues();
 
   // 2. 尋找符合的資料行索引
-  let rowIndex = -1;
-  for (let i = 0; i < dataValues.length; i++) {
-    const rowName = dataValues[i][nameIdx].toString().trim();
-    const rowBday = Utilities.formatDate(new Date(dataValues[i][bdayIdx]), "GMT+8", "yyyy-MM-dd");
-    
-    if (rowName === searchName && rowBday === searchBirthday) {
-      rowIndex = i;
+  let matchedRow = -1;
+  for (let i = 0; i < rowCount; i++) {
+    if (normalizeText(names[i][0]) === normalizeText(searchName) &&
+        normalizeDateValue(birthdays[i][0]) === normalizeDateValue(searchBirthday)) {
+      matchedRow = i + 3;
       break;
     }
   }
 
   // 找不到人員回傳 null
-  if (rowIndex === -1) return null;
+  if (matchedRow === -1) return null;
 
-  const rowData = dataValues[rowIndex];
-  const rowColors = dataColors[rowIndex]; // 取得該行的所有顏色
+  const rowRange = sheet.getRange(matchedRow, 1, 1, lastCol);
+  const rowData = rowRange.getValues()[0];
+  const rowColors = rowRange.getFontColors()[0];
   
   // 3. 修改輔助函式：現在同時回傳「值」與「顏色」
   const getValueAndColor = (colName) => {
@@ -263,16 +262,15 @@ function searchData(searchName, searchBirthday) {
     const unitIdx = headers.indexOf("服務單位");
     const activeIdx = headers.indexOf("目前是否執行業務");
 
-    const matchedRows = data.filter((row, i) => {
+    const ownRowIndex = data.findIndex(row => {
       const rowName = normalizeText(row[nameIdx]);
       const rowBday = normalizeDateValue(row[bdayIdx]);
-      const match = rowName === normalizeText(searchName) && rowBday === normalizeDateValue(searchBirthday);
-      return match;
+      return rowName === normalizeText(searchName) && rowBday === normalizeDateValue(searchBirthday);
     });
 
-    if (!matchedRows.length) return { error: "NOT_FOUND" };
+    if (ownRowIndex === -1) return { error: "NOT_FOUND" };
 
-    const row = matchedRows[0];
+    const row = data[ownRowIndex];
     const unit = String(row[unitIdx] || '').trim();
     const isActive = String(row[activeIdx] || '').trim();
 
@@ -280,32 +278,27 @@ function searchData(searchName, searchBirthday) {
       return { error: "NOT_ACTIVE" };
     }
 
-    let result = [];
-    if (access.canViewAll) {
-      result = data.map(r => {
-        let obj = {};
-        headers.forEach((h, idx) => {
-          let v = r[idx];
-          if (v instanceof Date) {
-            v = Utilities.formatDate(v, "GMT+8", "yyyy-MM-dd");
-          }
-          obj[h] = v;
-        });
-        return obj;
+    const identityIdx = headers.findIndex(header => ["身分證號", "身分證字號"].includes(header));
+    const visibleRows = access.canViewAll
+      ? data
+      : data.filter((staffRow, index) =>
+          index === ownRowIndex ||
+          (unit && normalizeUnit(staffRow[unitIdx]) === normalizeUnit(unit))
+        );
+    const result = visibleRows.map(staffRow => {
+      const obj = {};
+      headers.forEach((header, index) => {
+        let value = staffRow[index];
+        if (value instanceof Date) {
+          value = Utilities.formatDate(value, "GMT+8", "yyyy-MM-dd");
+        }
+        if (!access.canViewAll && index === identityIdx && staffRow !== row) {
+          value = "";
+        }
+        obj[header] = value;
       });
-    } else {
-      result = [matchedRows[0]].map(r => {
-        let obj = {};
-        headers.forEach((h, idx) => {
-          let v = r[idx];
-          if (v instanceof Date) {
-            v = Utilities.formatDate(v, "GMT+8", "yyyy-MM-dd");
-          }
-          obj[h] = v;
-        });
-        return obj;
-      });
-    }
+      return obj;
+    });
 
     return { unit: access.canViewAll ? '全部單位' : unit, list: result, role: access.role, canViewAll: access.canViewAll };
   }
