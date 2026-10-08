@@ -183,7 +183,10 @@
     }
     .outline-button:hover { border-color: var(--teal); color: var(--teal-dark); }
     .stats-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-bottom: 27px; }
-    .stat-card { display: flex; min-height: 118px; align-items: center; gap: 17px; padding: 21px; border: 1px solid var(--line); border-radius: 13px; background: var(--paper); box-shadow: 0 5px 18px rgba(36,68,76,.025); }
+    .stat-card { display: flex; min-height: 118px; align-items: center; gap: 17px; padding: 21px; border: 1px solid var(--line); border-radius: 13px; background: var(--paper); color: var(--ink); text-align: left; font: inherit; box-shadow: 0 5px 18px rgba(36,68,76,.025); cursor: pointer; transition: border-color .18s, box-shadow .18s; }
+    .stat-card:hover, .stat-card:focus-visible { border-color: var(--teal); box-shadow: 0 7px 22px rgba(8,126,131,.12); }
+    .stat-card:focus-visible { outline: 3px solid rgba(8,126,131,.2); outline-offset: 2px; }
+    .stat-card.is-selected { border-color: var(--teal); box-shadow: inset 0 0 0 1px var(--teal), 0 5px 18px rgba(36,68,76,.06); }
     .stat-icon { display: grid; width: 48px; height: 48px; flex: 0 0 48px; place-items: center; border-radius: 12px; background: #e9f5f4; color: var(--teal); font-size: 22px; }
     .stat-icon.gold { background: #fff5e7; color: #bd812d; }
     .stat-icon.blue { background: #edf3fb; color: #557eae; }
@@ -216,6 +219,9 @@
     .empty-state { padding: 44px 18px; color: var(--muted); text-align: center; font-size: 13px; }
     .loading-line { padding: 18px; color: var(--muted); text-align: center; font-size: 12px; }
     .notice { margin-bottom: 18px; padding: 13px 15px; border: 1px solid #d9ebea; border-radius: 10px; background: #f1f9f8; color: #3e6870; font-size: 12px; line-height: 1.7; }
+    .page-note h2 { margin: 0 0 6px; color: var(--teal-dark); font-size: 14px; }
+    .page-note p { margin: 0; }
+    .page-note p + p { margin-top: 4px; }
     .notice.warning { border-color: #d7a13c; border-left: 5px solid #bd812d; background: #fff5e7; color: #694914; font-weight: 700; }
     .annual-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
     .annual-card { padding: 18px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
@@ -223,16 +229,20 @@
     .annual-row { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-top: 1px solid #edf2f4; font-size: 15px; }
     .annual-row span:first-child { color: var(--muted); }
     .annual-row span:last-child { text-align: right; font-weight: 700; }
-    .modal-backdrop { position: fixed; z-index: 20; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(18,39,49,.48); }
+    .modal-backdrop { position: fixed; z-index: 20; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(18,39,49,.48); opacity: 0; transition: opacity .18s ease; }
     .modal-backdrop.modal-layer { z-index: 21; background: rgba(18,39,49,.3); }
-    .modal { width: min(100%, 720px); max-height: min(90vh, 850px); overflow: auto; border-radius: 15px; background: #fff; box-shadow: 0 25px 80px rgba(0,0,0,.2); }
+    .modal-backdrop.is-visible { opacity: 1; }
+    .modal-backdrop.is-closing { opacity: 0; pointer-events: none; }
+    .modal { display: flex; width: min(100%, 720px); max-height: min(90vh, 850px); flex-direction: column; overflow: hidden; border-radius: 15px; background: #fff; box-shadow: 0 25px 80px rgba(0,0,0,.2); opacity: 0; transform: translateY(-8px) scale(.98); transition: opacity .18s ease, transform .18s ease; }
+    .modal-backdrop.is-visible .modal { opacity: 1; transform: translateY(0) scale(1); }
+    .modal-backdrop.is-closing .modal { opacity: 0; transform: translateY(-8px) scale(.98); }
     .modal-head { position: sticky; z-index: 1; top: 0; display: flex; align-items: center; justify-content: space-between; padding: 18px 21px; border-bottom: 1px solid var(--line); background: #fff; }
     .modal-head h2 { margin: 0; font-size: 16px; }
     .close-button { width: 34px; height: 34px; border: 0; border-radius: 50%; background: #f2f6f7; color: #586c77; font-size: 20px; }
-    .modal-body { padding: 20px; background: #f4f7f8; }
+    .modal-body { min-height: 0; overflow-y: auto; flex: 1 1 auto; padding: 20px; background: #f4f7f8; }
     .detail-section { overflow: hidden; border: 1px solid #dce6e8; border-radius: 12px; background: #fff; box-shadow: 0 2px 6px rgba(25, 58, 68, .04); }
     .detail-section + .detail-section { margin-top: 14px; }
-    .detail-section h3 { margin: 0; padding: 12px 16px; border-bottom: 1px solid #dce9e9; border-left: 4px solid var(--teal); background: #eaf4f3; color: #155c60; font-size: 15px; font-weight: 800; }
+    .detail-section h3 { margin: 0; padding: 12px 16px; border-bottom: 1px solid #dce9e9; background: #eaf4f3; color: #155c60; font-size: 15px; font-weight: 800; }
     .detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; padding: 14px; }
     .detail-item { min-width: 0; padding: 10px 12px; border: 1px solid #e5ecee; border-radius: 8px; background: #fbfcfd; }
     .detail-label { color: #5b707b; font-size: 12px; font-weight: 700; line-height: 1.5; }
@@ -285,6 +295,9 @@
       .detail-item { padding: 9px 10px; }
       .login-intro { min-height: 225px; padding: 22px; }
       .intro-copy { margin-top: 28px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .modal-backdrop, .modal { transition-duration: .01ms; }
     }
   </style>
 </head>
@@ -355,14 +368,18 @@
           </div>
           <div id="noticeBox" class="notice hidden"></div>
           <div class="stats-grid">
-            <article class="stat-card"><div class="stat-icon" aria-hidden="true"><i class="fa-solid fa-users"></i></div><div><div class="stat-label">可檢視人員</div><div id="totalCount" class="stat-value">—</div></div></article>
-            <article class="stat-card"><div class="stat-icon gold" aria-hidden="true"><i class="fa-solid fa-user-check"></i></div><div><div class="stat-label">執行業務中</div><div id="activeCount" class="stat-value">—</div></div></article>
-            <article class="stat-card"><div class="stat-icon blue" aria-hidden="true"><i class="fa-solid fa-certificate"></i></div><div><div class="stat-label">已登記技術評價</div><div id="skillCount" class="stat-value">—</div></div></article>
+            <button class="stat-card" type="button" data-stat-filter="active" aria-pressed="false"><div class="stat-icon" aria-hidden="true"><i class="fa-solid fa-user-doctor"></i></div><div><div class="stat-label">執業中人數</div><div id="activeCount" class="stat-value">—</div></div></button>
+            <button class="stat-card" type="button" data-stat-filter="instructors" aria-pressed="false"><div class="stat-icon gold" aria-hidden="true"><i class="fa-solid fa-chalkboard-user"></i></div><div><div class="stat-label">師資人數</div><div id="instructorCount" class="stat-value">—</div></div></button>
+            <button class="stat-card" type="button" data-stat-filter="training" aria-pressed="false"><div class="stat-icon blue" aria-hidden="true"><i class="fa-solid fa-calendar-check"></i></div><div><div class="stat-label">今年應受訓人數</div><div id="trainingCount" class="stat-value">—</div></div></button>
           </div>
-          <div class="notice">送出的變更會以申請方式通知承辦人，不會直接修改清冊內容。</div>
+          <section class="notice page-note" aria-labelledby="pageNoteTitle">
+            <h2 id="pageNoteTitle">頁面說明</h2>
+            <p>以上統計及圖卡篩選皆以執業中人員（「目前是否執行業務」為「是」）計算。點擊圖卡可篩選清冊，再點擊一次即可取消。</p>
+            <p>送出的變更會以申請方式通知承辦人，不會直接修改清冊內容。</p>
+          </section>
           <section class="panel">
             <div class="panel-head">
-              <div><h2>工作人員資料清冊</h2></div>
+              <div><h2>工作人員資料清冊</h2><p id="directoryFilterStatus" aria-live="polite">點擊上方圖卡篩選符合條件的人員。</p></div>
               <div class="table-tools"><input id="directorySearch" class="search-input" type="search" placeholder="搜尋姓名或服務單位" aria-label="搜尋姓名或服務單位"></div>
             </div>
             <div class="table-wrap">
@@ -404,6 +421,7 @@
         user: null,
         profile: null,
         staff: [],
+        directoryFilter: '',
         annualResults: null,
         annualResultsLoaded: false,
         tableSort: {
@@ -412,6 +430,7 @@
         currentView: 'overview',
         toastTimer: null
       };
+      let bodyScrollStyles = null;
 
       const $ = (selector, root = document) => root.querySelector(selector);
       const escapeHtml = (value) => String(value == null ? '' : value)
@@ -448,6 +467,7 @@
 
       function enterApp(profile, name, birthday) {
         state.profile = profile;
+        state.directoryFilter = '';
         state.user = { name, birthday, unit: profile.unit || '' };
         state.annualResults = null;
         state.annualResultsLoaded = false;
@@ -524,24 +544,58 @@
           ? '目前帳號標記為未執行業務，無法載入資料清冊。'
           : `無法載入資料清冊${error ? `（${error}）` : ''}。請稍後重試或聯絡管理人員。`;
         $('#staffTableBody').innerHTML = `<tr><td colspan="5" class="empty-state">${escapeHtml(message)}</td></tr>`;
-        $('#totalCount').textContent = '0';
         $('#activeCount').textContent = '0';
-        $('#skillCount').textContent = '0';
+        $('#instructorCount').textContent = '0';
+        $('#trainingCount').textContent = '0';
         const noticeBox = $('#noticeBox');
         noticeBox.textContent = message;
         noticeBox.classList.toggle('warning', error === 'NOT_ACTIVE');
         noticeBox.classList.remove('hidden');
       }
 
+      function isActiveStaff(row) {
+        return row['目前是否執行業務'] === '是';
+      }
+
+      function matchesStatFilter(row, filter = state.directoryFilter) {
+        if (!isActiveStaff(row)) return false;
+        if (filter === 'instructors') {
+          return row['師資'] === '◯' &&
+            !String(row['師資統合-是否合格'] || '').includes('不合格') &&
+            !String(row['技術評價-是否合格'] || '').includes('不合格');
+        }
+        if (filter === 'training') return row['檢核'] !== '今年尚未屆期或過期';
+        return filter === 'active';
+      }
+
       function renderDirectory() {
-        const activeCount = state.staff.filter(row => row['目前是否執行業務'] !== '否').length;
-        const skillCount = state.staff.filter(row => row['技術評價獲證年度']).length;
-        $('#totalCount').textContent = String(state.staff.length);
-        $('#activeCount').textContent = String(activeCount);
-        $('#skillCount').textContent = String(skillCount);
+        const activeStaff = state.staff.filter(isActiveStaff);
+        $('#activeCount').textContent = String(activeStaff.length);
+        $('#instructorCount').textContent = String(activeStaff.filter(row => matchesStatFilter(row, 'instructors')).length);
+        $('#trainingCount').textContent = String(activeStaff.filter(row => matchesStatFilter(row, 'training')).length);
         $('#noticeBox').classList.add('hidden');
         $('#noticeBox').classList.remove('warning');
-        renderStaffTable(state.staff);
+        updateDirectoryFilterStatus();
+        renderStaffTable(getDirectoryRows());
+      }
+
+      function updateDirectoryFilterStatus() {
+        const labels = { active: '執業中人員', instructors: '符合資格的師資', training: '今年應受訓人員' };
+        const isFiltering = Boolean(state.directoryFilter);
+        $('#directoryFilterStatus').textContent = isFiltering
+          ? `篩選中：${labels[state.directoryFilter]}；再次點擊圖卡即可取消。`
+          : '點擊上方圖卡篩選符合條件的人員。';
+        document.querySelectorAll('[data-stat-filter]').forEach(card => {
+          const selected = card.dataset.statFilter === state.directoryFilter;
+          card.classList.toggle('is-selected', selected);
+          card.setAttribute('aria-pressed', String(selected));
+        });
+      }
+
+      function toggleDirectoryFilter(filter) {
+        state.directoryFilter = state.directoryFilter === filter ? '' : filter;
+        updateDirectoryFilterStatus();
+        renderStaffTable(getDirectoryRows());
       }
 
       function sortRows(rows, tableName) {
@@ -583,8 +637,9 @@
       function getDirectoryRows() {
         const query = $('#directorySearch').value.trim().toLowerCase();
         return state.staff.filter(row =>
-          String(row['姓名'] || '').toLowerCase().includes(query) ||
-          String(row['服務單位'] || '').toLowerCase().includes(query)
+          (!query || String(row['姓名'] || '').toLowerCase().includes(query) ||
+            String(row['服務單位'] || '').toLowerCase().includes(query)) &&
+          (!state.directoryFilter || matchesStatFilter(row))
         );
       }
 
@@ -612,26 +667,52 @@
 
       function openModal(title, content, footer = '', preservePrevious = false) {
         const modal = `<div class="modal-backdrop${preservePrevious ? ' modal-layer' : ''}"><section class="modal" role="dialog" aria-modal="true" aria-label="${escapeHtml(title)}"><header class="modal-head"><h2>${escapeHtml(title)}</h2><button class="close-button" type="button" data-dismiss="true" aria-label="關閉"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button></header><div class="modal-body">${content}</div>${footer ? `<footer class="modal-foot">${footer}</footer>` : ''}</section></div>`;
+        if (!bodyScrollStyles) {
+          const body = document.body;
+          const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+          bodyScrollStyles = {
+            overflow: body.style.overflow,
+            paddingRight: body.style.paddingRight
+          };
+          if (scrollbarWidth > 0) {
+            const currentPadding = parseFloat(getComputedStyle(body).paddingRight) || 0;
+            body.style.paddingRight = `${currentPadding + scrollbarWidth}px`;
+          }
+          body.style.overflow = 'hidden';
+        }
         if (preservePrevious) {
           $('#modalRoot').insertAdjacentHTML('beforeend', modal);
         } else {
           $('#modalRoot').innerHTML = modal;
         }
-        document.body.style.overflow = 'hidden';
+        const backdrop = $('#modalRoot').lastElementChild;
+        requestAnimationFrame(() => {
+          if (backdrop && backdrop.isConnected) backdrop.classList.add('is-visible');
+        });
       }
 
       function closeModal() {
-        $('#modalRoot').innerHTML = '';
-        document.body.style.overflow = '';
+        $('#modalRoot').querySelectorAll('.modal-backdrop').forEach(dismissModal);
       }
 
       function closeTopModal() {
         const modals = $('#modalRoot').querySelectorAll('.modal-backdrop');
-        if (modals.length > 1) {
-          modals[modals.length - 1].remove();
-          return;
-        }
-        closeModal();
+        if (modals.length) dismissModal(modals[modals.length - 1]);
+      }
+
+      function dismissModal(backdrop) {
+        if (backdrop.classList.contains('is-closing')) return;
+        backdrop.classList.remove('is-visible');
+        backdrop.classList.add('is-closing');
+        setTimeout(() => {
+          if (!backdrop.isConnected) return;
+          backdrop.remove();
+          if (!$('#modalRoot').querySelector('.modal-backdrop') && bodyScrollStyles) {
+            document.body.style.overflow = bodyScrollStyles.overflow;
+            document.body.style.paddingRight = bodyScrollStyles.paddingRight;
+            bodyScrollStyles = null;
+          }
+        }, 180);
       }
 
       function formatBirthday(value) {
@@ -839,7 +920,8 @@
           '服務單位', '姓名', ...(isAdmin() ? ['身分證字號'] : []), '生日', '聯絡電話', 'E-Mail',
           '師資統合獲證年度', '種子師資獲證年度', '最近一次帶初訓日',
           '技術評價獲證年度', '技術評價\n (皮內注射)\n 獲證年度', '初訓獲證年度',
-          'TST獲證年\n (部分縣市特有)', '目前是否執行業務', '未執行業務原因'
+          'TST獲證年\n (部分縣市特有)', '目前是否執行業務', '未執行業務原因',
+          '師資年限', '施打年限', '檢核', '建議參訓項目'
         ];
         try {
           const normalizeHeader = header => String(header || '').replace(/\s+/g, '').toLowerCase();
@@ -851,8 +933,10 @@
             return normalizeHeader(column) === '生日' ? formatBirthday(value) : value;
           }));
           const rocData = [columns, ...rows];
+          const yearLimitColumns = new Set(['師資年限', '施打年限']);
           const gregorianData = rocData.map((row, rowIndex) => row.map((value, columnIndex) => {
-            if (rowIndex === 0 || !columns[columnIndex].includes('年度') || value === '') return value;
+            const column = columns[columnIndex];
+            if (rowIndex === 0 || (!column.includes('年度') && !yearLimitColumns.has(normalizeHeader(column))) || value === '') return value;
             const rocYear = Number(value);
             return Number.isFinite(rocYear) ? rocYear + 1911 : value;
           }));
@@ -882,6 +966,9 @@
       $('#annualRefreshButton').addEventListener('click', () => loadAnnualResults(true));
       $('#addStaffButton').addEventListener('click', requestAddStaff);
       $('#exportButton').addEventListener('click', exportStaff);
+      document.querySelectorAll('[data-stat-filter]').forEach(card => {
+        card.addEventListener('click', () => toggleDirectoryFilter(card.dataset.statFilter));
+      });
       $('#directorySearch').addEventListener('input', event => {
         renderStaffTable(getDirectoryRows());
       });
