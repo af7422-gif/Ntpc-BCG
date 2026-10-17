@@ -24,6 +24,13 @@ function normalizeDateValue(value) {
   return String(value).trim();
 }
 
+function maskIdentityNumber(value) {
+  const identityNumber = String(value || '').trim();
+  if (!identityNumber) return '';
+  if (identityNumber.length < 5) return '*'.repeat(identityNumber.length);
+  return `${identityNumber.slice(0, 3)}*****${identityNumber.slice(-2)}`;
+}
+
 function normalizeUnit(value) {
   return String(value || '').replace(/\s+/g, '').trim();
 }
@@ -292,8 +299,8 @@ function searchData(searchName, searchBirthday) {
         if (value instanceof Date) {
           value = Utilities.formatDate(value, "GMT+8", "yyyy-MM-dd");
         }
-        if (!access.canViewAll && index === identityIdx && staffRow !== row) {
-          value = "";
+        if (!access.canViewAll && index === identityIdx) {
+          value = staffRow === row ? maskIdentityNumber(value) : "";
         }
         obj[header] = value;
       });
@@ -301,6 +308,94 @@ function searchData(searchName, searchBirthday) {
     });
 
     return { unit: access.canViewAll ? '全部單位' : unit, list: result, role: access.role, canViewAll: access.canViewAll };
+  }
+
+  function updateStaffFieldAsAdmin(editorName, editorBirthday, targetUnit, targetName, targetBirthday, fieldName, newValue) {
+    const access = getUserAccessProfile(editorName, editorBirthday);
+    if (access.error || !access.canViewAll) {
+      throw new Error("只有管理者可以直接修改資料。");
+    }
+
+    const fieldTypes = {
+      "姓名": "text",
+      "生日": "date",
+      "聯絡電話": "text",
+      "E-Mail": "text",
+      "師資統合獲證年度": "number",
+      "種子師資獲證年度": "number",
+      "最近一次帶初訓日": "date",
+      "技術評價獲證年度": "number",
+      "初訓獲證年度": "number",
+      "歷年指導紀錄": "json",
+      "目前是否執行業務": "select",
+      "未執行業務原因": "text"
+    };
+    const fieldType = fieldTypes[fieldName];
+    if (!fieldType) throw new Error("此欄位不開放直接修改。");
+
+    let value = String(newValue == null ? "" : newValue).trim();
+    if (!value && fieldType !== "json") throw new Error("修改內容不可空白。");
+    if (fieldType === "json") {
+      let history;
+      try {
+        history = JSON.parse(value);
+      } catch (error) {
+        throw new Error("歷年指導紀錄不是有效的 JSON 格式。");
+      }
+      if (!history || typeof history !== "object" || Array.isArray(history) ||
+          !Array.isArray(history.assistantRecords) || !Array.isArray(history.traineeRecords)) {
+        throw new Error("歷年指導紀錄格式不正確，請確認 assistantRecords 與 traineeRecords 均為陣列。");
+      }
+      if ([...history.assistantRecords, ...history.traineeRecords].some(record =>
+        !record || typeof record !== "object" || Array.isArray(record)
+      )) {
+        throw new Error("歷年指導紀錄包含格式不正確的項目。");
+      }
+      value = JSON.stringify(history);
+    } else if (fieldType === "number") {
+      value = Number(value);
+      if (!Number.isFinite(value)) throw new Error("請輸入有效的數字。");
+    } else if (fieldType === "date") {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) throw new Error("日期格式不正確。");
+      const date = new Date(`${value}T00:00:00+08:00`);
+      if (Utilities.formatDate(date, "GMT+8", "yyyy-MM-dd") !== value) {
+        throw new Error("日期格式不正確。");
+      }
+      value = date;
+    } else if (fieldType === "select" && !["是", "否"].includes(value)) {
+      throw new Error("業務狀態僅可設定為「是」或「否」。");
+    }
+
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("新北市在職清冊");
+    if (!sheet) throw new Error("找不到工作表。");
+    const lastRow = sheet.getLastRow();
+    const lastCol = sheet.getLastColumn();
+    if (lastRow < 3) throw new Error("找不到工作人員資料。");
+
+    const headers = sheet.getRange(2, 1, 1, lastCol).getValues()[0];
+    const nameIdx = headers.indexOf("姓名");
+    const birthdayIdx = headers.indexOf("生日");
+    const unitIdx = headers.indexOf("服務單位");
+    const fieldIdx = headers.indexOf(fieldName);
+    if ([nameIdx, birthdayIdx, unitIdx, fieldIdx].includes(-1)) {
+      throw new Error("找不到必要欄位。");
+    }
+
+    const data = sheet.getRange(3, 1, lastRow - 2, lastCol).getValues();
+    const matchedRows = [];
+    data.forEach((row, index) => {
+      if (normalizeText(row[nameIdx]) === normalizeText(targetName) &&
+          normalizeDateValue(row[birthdayIdx]) === normalizeDateValue(targetBirthday) &&
+          normalizeUnit(row[unitIdx]) === normalizeUnit(targetUnit)) {
+        matchedRows.push(index + 3);
+      }
+    });
+    if (matchedRows.length !== 1) {
+      throw new Error(matchedRows.length ? "符合條件的資料不唯一，未進行修改。" : "找不到對應人員資料。");
+    }
+
+    sheet.getRange(matchedRows[0], fieldIdx + 1).setValue(value);
+    return true;
   }
 
   function addEditCommentByName(unit, targetName, fieldName, newValue, requesterName) {

@@ -197,8 +197,8 @@
     .panel-head h2 { margin: 0; font-size: 18px; }
     .panel-head p { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
     .table-tools { display: flex; align-items: center; gap: 9px; }
-    .search-input { width: min(320px, 35vw); height: 43px; padding: 0 14px; border: 1px solid #dce6e9; border-radius: 8px; outline: 0; font-size: 14px; }
-    .search-input:focus { border-color: var(--teal); }
+    .unit-filter { width: min(320px, 35vw); height: 43px; padding: 0 14px; border: 1px solid #dce6e9; border-radius: 8px; outline: 0; background: #fff; color: var(--ink); font-size: 14px; }
+    .unit-filter:focus { border-color: var(--teal); }
     .table-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; white-space: nowrap; }
     th { padding: 15px 20px; background: #f7fafb; color: #526a78; text-align: left; font-size: 14px; font-weight: 800; }
@@ -243,13 +243,39 @@
     .detail-section { overflow: hidden; border: 1px solid #dce6e8; border-radius: 12px; background: #fff; box-shadow: 0 2px 6px rgba(25, 58, 68, .04); }
     .detail-section + .detail-section { margin-top: 14px; }
     .detail-section h3 { margin: 0; padding: 12px 16px; border-bottom: 1px solid #dce9e9; background: #eaf4f3; color: #155c60; font-size: 15px; font-weight: 800; }
+    .history-section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
     .detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; padding: 14px; }
     .detail-item { min-width: 0; padding: 10px 12px; border: 1px solid #e5ecee; border-radius: 8px; background: #fbfcfd; }
     .detail-label { color: #5b707b; font-size: 12px; font-weight: 700; line-height: 1.5; }
     .detail-value { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 5px; color: #183b45; font-size: 15px; font-weight: 700; line-height: 1.6; }
+    .personal-profile .detail-section h3 { font-size: 18px; }
+    .personal-profile .detail-label { font-size: 15px; }
+    .personal-profile .detail-value { font-size: 18px; }
     .detail-value-text { min-width: 0; overflow-wrap: anywhere; }
     .detail-edit-button { flex: 0 0 auto; padding: 5px 8px; border: 1px solid #c9dfdc; border-radius: 7px; background: #fff; color: #155c60; font-size: 12px; font-weight: 700; }
     .detail-edit-button:hover { background: #eaf4f3; }
+    .history-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; padding: 14px; }
+    .history-panel { min-width: 0; overflow: hidden; border: 1px solid #e5ecee; border-radius: 8px; background: #fbfcfd; }
+    .history-panel h4 { margin: 0; padding: 11px 12px; border-bottom: 1px solid #e5ecee; color: #155c60; font-size: 14px; }
+    .history-table-wrap { overflow-x: auto; }
+    .history-table { width: 100%; min-width: 360px; border-collapse: collapse; white-space: normal; }
+    .history-table th, .history-table td { padding: 9px 10px; border-top: 1px solid #edf2f4; color: #425968; text-align: left; font-size: 12px; line-height: 1.5; }
+    .history-table th { border-top: 0; background: #f7fafb; color: #526a78; font-weight: 800; }
+    .history-empty, .history-error { margin: 0; padding: 14px; color: var(--muted); font-size: 13px; }
+    .history-error { color: var(--red); }
+    .history-editor { display: grid; gap: 16px; }
+    .history-editor-section { padding: 15px; border: 1px solid #dce6e8; border-radius: 10px; background: #fff; }
+    .history-editor-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .history-editor-head h3 { margin: 0; color: var(--teal-dark); font-size: 15px; }
+    .history-record-list { display: grid; gap: 10px; }
+    .history-edit-row { position: relative; padding: 14px; border: 1px solid #e5ecee; border-radius: 8px; background: #fbfcfd; }
+    .history-edit-row.assistant-record { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 10px; }
+    .history-edit-row.trainee-record { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 12px; }
+    .history-edit-row .field { margin: 5px 0 9px; }
+    .history-edit-row .field label { display: grid; gap: 7px; }
+    .history-edit-row .field input { height: 40px; }
+    .history-record-remove { padding: 8px 10px; border: 1px solid #e4caca; border-radius: 7px; background: #fff; color: #9f3d3d; font-size: 12px; font-weight: 700; }
+    .history-record-remove:hover { background: #fff5f4; }
     .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
     .form-grid .field { margin: 9px 0; }
     .form-grid .field input, .form-grid .field select { height: 43px; }
@@ -287,8 +313,10 @@
       .stat-card { min-height: 82px; }
       .panel-head { align-items: flex-start; flex-direction: column; }
       .table-tools { width: 100%; }
-      .search-input { width: 100%; }
+      .unit-filter { width: 100%; }
       .annual-grid, .detail-grid, .form-grid { grid-template-columns: 1fr; }
+      .history-grid { grid-template-columns: 1fr; padding: 10px; }
+      .history-edit-row.trainee-record { grid-template-columns: 1fr; }
       .modal-backdrop { padding: 10px; }
       .modal-body { padding: 12px; }
       .detail-grid { gap: 8px; padding: 10px; }
@@ -347,6 +375,7 @@
     <div class="workspace">
       <aside class="sidebar">
         <nav class="nav-list" aria-label="主要導覽">
+          <button id="personalProfileNav" class="nav-button hidden" type="button" data-view="personal"><span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-id-card"></i></span>檢視個人資料</button>
           <button class="nav-button active" type="button" data-view="overview"><span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-address-book"></i></span>名冊瀏覽及維護</button>
           <button class="nav-button" type="button" data-view="annual"><span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-award"></i></span>年度訓練成績</button>
         </nav>
@@ -358,6 +387,13 @@
       </aside>
 
       <main class="main-content">
+        <section id="personalView" class="app-view hidden">
+          <div class="page-heading">
+            <div><div class="eyebrow">PERSONAL PROFILE</div><h1>檢視個人資料</h1><p>查看您的個人與執業資料。</p></div>
+          </div>
+          <div id="personalProfileContent" class="personal-profile"><div class="panel empty-state">正在載入個人資料…</div></div>
+        </section>
+
         <section id="overviewView" class="app-view">
           <div class="page-heading">
             <div><div class="eyebrow">STAFF DIRECTORY</div><h1>名冊瀏覽及維護</h1></div>
@@ -380,7 +416,7 @@
           <section class="panel">
             <div class="panel-head">
               <div><h2>工作人員資料清冊</h2><p id="directoryFilterStatus" aria-live="polite">點擊上方圖卡篩選符合條件的人員。</p></div>
-              <div class="table-tools"><input id="directorySearch" class="search-input" type="search" placeholder="搜尋姓名或服務單位" aria-label="搜尋姓名或服務單位"></div>
+              <div class="table-tools"><select id="directoryUnitFilter" class="unit-filter" aria-label="依服務單位篩選"><option value="">全部服務單位</option></select></div>
             </div>
             <div class="table-wrap">
               <table id="staffTable">
@@ -462,6 +498,7 @@
         document.querySelectorAll('.nav-button').forEach(button => {
           button.classList.toggle('active', button.dataset.view === view);
         });
+        if (view === 'personal') renderPersonalProfile();
         if (view === 'annual') loadAnnualResults();
       }
 
@@ -479,6 +516,8 @@
         $('#userAvatar').textContent = name.charAt(0) || '用';
         $('#exportButton').classList.remove('hidden');
         $('#addStaffButton').classList.toggle('hidden', !isAdmin());
+        $('#personalProfileNav').classList.toggle('hidden', isAdmin());
+        setView(isAdmin() ? 'overview' : 'personal');
         loadDirectory();
       }
 
@@ -575,16 +614,31 @@
         $('#trainingCount').textContent = String(activeStaff.filter(row => matchesStatFilter(row, 'training')).length);
         $('#noticeBox').classList.add('hidden');
         $('#noticeBox').classList.remove('warning');
+        updateDirectoryUnitOptions();
         updateDirectoryFilterStatus();
         renderStaffTable(getDirectoryRows());
+        if (state.currentView === 'personal') renderPersonalProfile();
+      }
+
+      function updateDirectoryUnitOptions() {
+        const select = $('#directoryUnitFilter');
+        const selectedUnit = select.value;
+        const units = [...new Set(state.staff.map(row => String(row['服務單位'] || '').trim()).filter(Boolean))]
+          .sort((left, right) => left.localeCompare(right, 'zh-Hant'));
+        select.replaceChildren(new Option('全部服務單位', ''));
+        units.forEach(unit => select.add(new Option(unit, unit)));
+        select.value = units.includes(selectedUnit) ? selectedUnit : '';
       }
 
       function updateDirectoryFilterStatus() {
         const labels = { active: '執業中人員', instructors: '符合資格的師資', training: '今年應受訓人員' };
-        const isFiltering = Boolean(state.directoryFilter);
-        $('#directoryFilterStatus').textContent = isFiltering
-          ? `篩選中：${labels[state.directoryFilter]}；再次點擊圖卡即可取消。`
-          : '點擊上方圖卡篩選符合條件的人員。';
+        const filters = [];
+        const unit = $('#directoryUnitFilter').value;
+        if (unit) filters.push(`服務單位：${unit}`);
+        if (state.directoryFilter) filters.push(labels[state.directoryFilter]);
+        $('#directoryFilterStatus').textContent = filters.length
+          ? `篩選中：${filters.join('；')}。`
+          : '選取服務單位或點擊上方圖卡篩選清冊。';
         document.querySelectorAll('[data-stat-filter]').forEach(card => {
           const selected = card.dataset.statFilter === state.directoryFilter;
           card.classList.toggle('is-selected', selected);
@@ -635,10 +689,9 @@
       }
 
       function getDirectoryRows() {
-        const query = $('#directorySearch').value.trim().toLowerCase();
+        const selectedUnit = $('#directoryUnitFilter').value;
         return state.staff.filter(row =>
-          (!query || String(row['姓名'] || '').toLowerCase().includes(query) ||
-            String(row['服務單位'] || '').toLowerCase().includes(query)) &&
+          (!selectedUnit || String(row['服務單位'] || '').trim() === selectedUnit) &&
           (!state.directoryFilter || matchesStatFilter(row))
         );
       }
@@ -719,7 +772,65 @@
         return String(value == null ? '' : value).replace(/^(\d{4})-(\d{2})-(\d{2})$/, '$1/$2/$3');
       }
 
-      function showDetails(row) {
+      function parseMentorshipHistory(value) {
+        if (value == null || (typeof value === 'string' && value.trim() === '')) {
+          return { assistantRecords: [], traineeRecords: [] };
+        }
+
+        let parsed = value;
+        if (typeof value === 'string') {
+          try {
+            parsed = JSON.parse(value);
+          } catch (error) {
+            return { error: '歷年指導紀錄不是有效的 JSON 格式。' };
+          }
+        }
+        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed) ||
+            !Array.isArray(parsed.assistantRecords) || !Array.isArray(parsed.traineeRecords)) {
+          return { error: '歷年指導紀錄格式不正確，請確認 assistantRecords 與 traineeRecords 均為陣列。' };
+        }
+        if ([...parsed.assistantRecords, ...parsed.traineeRecords].some(record =>
+          !record || typeof record !== 'object' || Array.isArray(record)
+        )) {
+          return { error: '歷年指導紀錄包含格式不正確的項目。' };
+        }
+        return parsed;
+      }
+
+      function renderMentorshipRecordTable(title, records, fields) {
+        const body = records.length
+          ? `<div class="history-table-wrap"><table class="history-table"><thead><tr>${fields.map(([label]) => `<th scope="col">${escapeHtml(label)}</th>`).join('')}</tr></thead><tbody>${records.map(record =>
+              `<tr>${fields.map(([, key]) => `<td>${escapeHtml(text(record[key]))}</td>`).join('')}</tr>`
+            ).join('')}</tbody></table></div>`
+          : '<p class="history-empty">目前沒有紀錄。</p>';
+        return `<article class="history-panel"><h4>${escapeHtml(title)}</h4>${body}</article>`;
+      }
+
+      function buildMentorshipHistoryContent(row) {
+        if (!Object.prototype.hasOwnProperty.call(row, '歷年指導紀錄')) return '';
+        const rowIndex = state.staff.indexOf(row);
+        const editButton = isAdmin()
+          ? `<button class="detail-edit-button" type="button" data-row-index="${rowIndex}" data-edit-field="歷年指導紀錄" aria-label="直接修改歷年指導紀錄"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> 直接修改</button>`
+          : '';
+        const history = parseMentorshipHistory(row['歷年指導紀錄']);
+        if (history.error) {
+          return `<section class="detail-section"><h3 class="history-section-head"><span>歷年指導紀錄</span>${editButton}</h3><p class="history-error">${escapeHtml(history.error)}</p></section>`;
+        }
+        return `<section class="detail-section"><h3 class="history-section-head"><span>歷年指導紀錄</span>${editButton}</h3><div class="history-grid">${
+          renderMentorshipRecordTable('協助局端初訓', history.assistantRecords, [['年度', 'year']])
+        }${
+          renderMentorshipRecordTable('指導年度學員', history.traineeRecords, [
+            ['年度', 'year'],
+            ['學員姓名', 'studentName'],
+            ['所在縣市', 'city'],
+            ['行政區域', 'district'],
+            ['服務單位名稱', 'unit'],
+            ['指導注射次數', 'shots']
+          ])
+        }</div></section>`;
+      }
+
+      function buildStaffDetailsContent(row) {
         const rowIndex = state.staff.indexOf(row);
         const sections = [
           ['基本資料', [
@@ -754,13 +865,30 @@
           `<section class="detail-section"><h3>${escapeHtml(title)}</h3><div class="detail-grid">${fields.map(([label, field]) => {
             const value = field === '生日' ? formatBirthday(row[field]) : row[field];
             const editButton = editableFields[field]
-              ? `<button class="detail-edit-button" type="button" data-row-index="${rowIndex}" data-edit-field="${escapeHtml(field)}" aria-label="申請修改${escapeHtml(label)}"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> 申請修改</button>`
+                ? `<button class="detail-edit-button" type="button" data-row-index="${rowIndex}" data-edit-field="${escapeHtml(field)}" aria-label="${isAdmin() ? '直接修改' : '申請修改'}${escapeHtml(label)}"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> ${isAdmin() ? '直接修改' : '申請修改'}</button>`
               : '';
             return `<div class="detail-item"><div class="detail-label">${escapeHtml(label)}</div><div class="detail-value"><span class="detail-value-text">${escapeHtml(text(value))}</span>${editButton}</div></div>`;
           }).join('')}</div></section>`
         ).join('');
+        return content + buildMentorshipHistoryContent(row);
+      }
+
+      function renderPersonalProfile() {
+        const content = $('#personalProfileContent');
+        const row = state.staff.find(staffRow =>
+          String(staffRow['姓名'] || '').trim() === state.user.name &&
+          String(staffRow['生日'] || '').trim() === state.user.birthday
+        );
+        if (!row) {
+          content.innerHTML = '<div class="panel empty-state">目前無法載入個人資料，請稍後重試。</div>';
+          return;
+        }
+        content.innerHTML = buildStaffDetailsContent(row);
+      }
+
+      function showDetails(row) {
         const footer = '<button class="outline-button" type="button" data-dismiss="true">關閉</button>';
-        openModal(`${row['姓名'] || '工作人員'}｜資料明細`, content, footer);
+        openModal(`${row['姓名'] || '工作人員'}｜資料明細`, buildStaffDetailsContent(row), footer);
       }
 
       function loadAnnualResults(forceRefresh = false) {
@@ -805,6 +933,102 @@
             ).join('');
       }
 
+      function buildHistoryAssistantFormRow(record = {}) {
+        return `<div class="history-edit-row assistant-record" data-history-record="assistant">
+          <div class="field"><label>年度<input type="number" min="0" step="1" data-history-field="year" value="${escapeHtml(record.year)}" required></label></div>
+          <button class="history-record-remove" type="button" data-history-action="remove">刪除此筆</button>
+        </div>`;
+      }
+
+      function buildHistoryTraineeFormRow(record = {}) {
+        const fields = [
+          ['年度', 'year', 'number'],
+          ['學員姓名', 'studentName', 'text'],
+          ['所在縣市', 'city', 'text'],
+          ['行政區域', 'district', 'text'],
+          ['服務單位名稱', 'unit', 'text'],
+          ['指導注射次數', 'shots', 'number']
+        ];
+        return `<div class="history-edit-row trainee-record" data-history-record="trainee">${fields.map(([label, key, type]) =>
+          `<div class="field"><label>${escapeHtml(label)}<input type="${type}" ${type === 'number' ? 'min="0" step="1"' : ''} data-history-field="${key}" value="${escapeHtml(record[key])}" required></label></div>`
+        ).join('')}<button class="history-record-remove" type="button" data-history-action="remove">刪除此筆</button></div>`;
+      }
+
+      function requestMentorshipHistoryEdit(row) {
+        if (!isAdmin()) {
+          notify('只有管理者可以修改歷年指導紀錄。', true);
+          return;
+        }
+        const history = parseMentorshipHistory(row['歷年指導紀錄']);
+        if (history.error) {
+          notify(`${history.error}，請先修正清冊中的資料格式。`, true);
+          return;
+        }
+        const assistantRows = history.assistantRecords.map(buildHistoryAssistantFormRow).join('');
+        const traineeRows = history.traineeRecords.map(buildHistoryTraineeFormRow).join('');
+        const content = `<p class="subtext">編輯對象：<strong>${escapeHtml(row['姓名'])}</strong></p>
+          <form id="historyEditForm" class="history-editor">
+            <section class="history-editor-section">
+              <div class="history-editor-head"><h3>協助局端初訓</h3><button class="outline-button" type="button" data-history-action="add-assistant">新增年度</button></div>
+              <div id="assistantHistoryRows" class="history-record-list">${assistantRows}</div>
+            </section>
+            <section class="history-editor-section">
+              <div class="history-editor-head"><h3>指導年度學員</h3><button class="outline-button" type="button" data-history-action="add-trainee">新增學員紀錄</button></div>
+              <div id="traineeHistoryRows" class="history-record-list">${traineeRows}</div>
+            </section>
+          </form>`;
+        const footer = '<button class="outline-button" type="button" data-dismiss="true">取消</button><button id="saveHistoryButton" class="primary-button" type="button">儲存紀錄</button>';
+        openModal('編輯歷年指導紀錄', content, footer, true);
+        const form = $('#historyEditForm');
+        form.addEventListener('click', event => {
+          const action = event.target.closest('[data-history-action]');
+          if (!action) return;
+          if (action.dataset.historyAction === 'add-assistant') {
+            $('#assistantHistoryRows', form).insertAdjacentHTML('beforeend', buildHistoryAssistantFormRow());
+          } else if (action.dataset.historyAction === 'add-trainee') {
+            $('#traineeHistoryRows', form).insertAdjacentHTML('beforeend', buildHistoryTraineeFormRow());
+          } else if (action.dataset.historyAction === 'remove') {
+            action.closest('[data-history-record]').remove();
+          }
+        });
+        $('#saveHistoryButton').addEventListener('click', () => {
+          if (!form.reportValidity()) return;
+          const records = type => [...form.querySelectorAll(`[data-history-record="${type}"]`)].map(record => {
+            const value = key => record.querySelector(`[data-history-field="${key}"]`).value.trim();
+            if (type === 'assistant') return { year: Number(value('year')) };
+            return {
+              year: Number(value('year')),
+              studentName: value('studentName'),
+              city: value('city'),
+              district: value('district'),
+              unit: value('unit'),
+              shots: Number(value('shots'))
+            };
+          });
+          const value = JSON.stringify({
+            assistantRecords: records('assistant'),
+            traineeRecords: records('trainee')
+          });
+          const button = $('#saveHistoryButton');
+          button.disabled = true;
+          button.textContent = '儲存中…';
+          google.script.run
+            .withSuccessHandler(() => {
+              closeModal();
+              loadDirectory();
+              notify('歷年指導紀錄已更新。');
+            })
+            .withFailureHandler(error => {
+              button.disabled = false;
+              button.textContent = '儲存紀錄';
+              notify(`更新失敗：${error && error.message ? error.message : error}`, true);
+            })
+            .updateStaffFieldAsAdmin(
+              state.user.name, state.user.birthday, row['服務單位'], row['姓名'], row['生日'], '歷年指導紀錄', value
+            );
+        });
+      }
+
       const editableFields = {
         '姓名': { type: 'text' },
         '生日': { type: 'date' },
@@ -813,6 +1037,7 @@
         '師資統合獲證年度': { type: 'number' },
         '種子師資獲證年度': { type: 'number' },
         '最近一次帶初訓日': { type: 'date' },
+        '歷年指導紀錄': { type: 'history' },
         '技術評價獲證年度': { type: 'number' },
         '初訓獲證年度': { type: 'number' },
         '目前是否執行業務': { type: 'select' },
@@ -821,40 +1046,59 @@
 
       function requestEdit(row, field) {
         const config = editableFields[field];
+        const adminEdit = isAdmin();
         if (!config) {
-          notify('此欄位不開放修改申請。', true);
+          notify('此欄位不開放修改。', true);
+          return;
+        }
+        if (config.type === 'history') {
+          requestMentorshipHistoryEdit(row);
           return;
         }
         const input = config.type === 'select'
           ? `<select id="editValue"><option value="是" ${row[field] === '是' ? 'selected' : ''}>是</option><option value="否" ${row[field] === '否' ? 'selected' : ''}>否</option></select>`
           : `<input id="editValue" type="${config.type}" value="${escapeHtml(row[field] || '')}">`;
         const content = `<p class="subtext">修改對象：<strong>${escapeHtml(row['姓名'])}</strong></p><div class="field"><label for="editValue">修改欄位：${escapeHtml(field)}</label>${input}</div>`;
-        const footer = '<button class="outline-button" type="button" data-dismiss="true">取消</button><button id="submitEditButton" class="primary-button" type="button">送出修改申請</button>';
-        openModal('申請修改工作人員資料', content, footer, true);
+        const submitLabel = adminEdit ? '儲存變更' : '送出修改申請';
+        const footer = `<button class="outline-button" type="button" data-dismiss="true">取消</button><button id="submitEditButton" class="primary-button" type="button">${submitLabel}</button>`;
+        openModal(adminEdit ? '直接修改工作人員資料' : '申請修改工作人員資料', content, footer, true);
         $('#submitEditButton').addEventListener('click', () => {
           const value = $('#editValue').value.trim();
           if (!value) {
-            notify('請輸入修改內容。', true);
+            notify('修改內容不可空白。', true);
             return;
           }
           const button = $('#submitEditButton');
           button.disabled = true;
-          button.textContent = '送出中…';
-          google.script.run
+          button.textContent = adminEdit ? '儲存中…' : '送出中…';
+          const runner = google.script.run
             .withSuccessHandler(result => {
-              closeTopModal();
               if (result === false) {
-                notify('找不到對應人員資料，申請未送出。', true);
+                notify(adminEdit ? '找不到對應人員資料，未進行修改。' : '找不到對應人員資料，申請未送出。', true);
+                closeTopModal();
                 return;
               }
-              notify('修改申請已送出，待承辦人確認。');
+              if (adminEdit) {
+                closeModal();
+                loadDirectory();
+                notify('資料已直接更新。');
+              } else {
+                closeTopModal();
+                notify('修改申請已送出，待承辦人確認。');
+              }
             })
             .withFailureHandler(error => {
               button.disabled = false;
-              button.textContent = '送出修改申請';
-              notify(`送出失敗：${error && error.message ? error.message : error}`, true);
-            })
-            .addEditCommentByName(row['服務單位'], row['姓名'], field, value, state.user.name);
+              button.textContent = submitLabel;
+              notify(`${adminEdit ? '更新失敗' : '送出失敗'}：${error && error.message ? error.message : error}`, true);
+            });
+          if (adminEdit) {
+            runner.updateStaffFieldAsAdmin(
+              state.user.name, state.user.birthday, row['服務單位'], row['姓名'], row['生日'], field, value
+            );
+          } else {
+            runner.addEditCommentByName(row['服務單位'], row['姓名'], field, value, state.user.name);
+          }
         });
       }
 
@@ -969,7 +1213,8 @@
       document.querySelectorAll('[data-stat-filter]').forEach(card => {
         card.addEventListener('click', () => toggleDirectoryFilter(card.dataset.statFilter));
       });
-      $('#directorySearch').addEventListener('input', event => {
+      $('#directoryUnitFilter').addEventListener('change', () => {
+        updateDirectoryFilterStatus();
         renderStaffTable(getDirectoryRows());
       });
       document.querySelectorAll('.sort-button').forEach(button => {
@@ -981,6 +1226,12 @@
         const row = state.staff[Number(button.dataset.index)];
         if (!row) return;
         if (button.dataset.action === 'detail') showDetails(row);
+      });
+      $('#personalProfileContent').addEventListener('click', event => {
+        const editButton = event.target.closest('button[data-edit-field]');
+        if (!editButton) return;
+        const row = state.staff[Number(editButton.dataset.rowIndex)];
+        if (row) requestEdit(row, editButton.dataset.editField);
       });
       $('#modalRoot').addEventListener('click', event => {
         const editButton = event.target.closest('button[data-edit-field]');
