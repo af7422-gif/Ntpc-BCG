@@ -311,9 +311,22 @@ function searchData(searchName, searchBirthday) {
   }
 
   function updateStaffFieldAsAdmin(editorName, editorBirthday, targetUnit, targetName, targetBirthday, fieldName, newValue) {
+    return updateStaffFieldInternal(editorName, editorBirthday, targetUnit, targetName, targetBirthday, fieldName, newValue, false);
+  }
+
+  function updateStaffField(editorName, editorBirthday, targetUnit, targetName, targetBirthday, fieldName, newValue) {
+    return updateStaffFieldInternal(editorName, editorBirthday, targetUnit, targetName, targetBirthday, fieldName, newValue, true);
+  }
+
+  function updateStaffFieldInternal(editorName, editorBirthday, targetUnit, targetName, targetBirthday, fieldName, newValue, allowSelfEdit) {
     const access = getUserAccessProfile(editorName, editorBirthday);
-    if (access.error || !access.canViewAll) {
-      throw new Error("只有管理者可以直接修改資料。");
+    const selfEditableFields = new Set(["姓名", "生日", "聯絡電話", "E-Mail"]);
+    const isOwnRecord = normalizeText(editorName) === normalizeText(targetName) &&
+      normalizeDateValue(editorBirthday) === normalizeDateValue(targetBirthday) &&
+      normalizeUnit(access.unit) === normalizeUnit(targetUnit);
+    if (access.error || (!access.canViewAll &&
+        (!allowSelfEdit || !isOwnRecord || !selfEditableFields.has(fieldName)))) {
+      throw new Error("沒有權限直接修改此筆資料。");
     }
 
     const fieldTypes = {
@@ -394,8 +407,48 @@ function searchData(searchName, searchBirthday) {
       throw new Error(matchedRows.length ? "符合條件的資料不唯一，未進行修改。" : "找不到對應人員資料。");
     }
 
+    const profileSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("權限管理") ||
+      SpreadsheetApp.getActiveSpreadsheet().getSheetByName("UserAccess") ||
+      SpreadsheetApp.getActiveSpreadsheet().getSheetByName("使用者權限");
+    let profileRow = -1;
+    let profileNameIdx = -1;
+    let profileBirthdayIdx = -1;
+    if (profileSheet && ["姓名", "生日"].includes(fieldName)) {
+      const profileLastRow = profileSheet.getLastRow();
+      const profileLastCol = profileSheet.getLastColumn();
+      if (profileLastRow >= 2 && profileLastCol > 0) {
+        const profileHeaders = profileSheet.getRange(1, 1, 1, profileLastCol).getValues()[0];
+        profileNameIdx = profileHeaders.indexOf("姓名");
+        profileBirthdayIdx = profileHeaders.indexOf("生日");
+        if (profileNameIdx !== -1 && profileBirthdayIdx !== -1) {
+          const profileData = profileSheet.getRange(2, 1, profileLastRow - 1, profileLastCol).getValues();
+          const matchedProfiles = [];
+          profileData.forEach((row, index) => {
+            if (normalizeText(row[profileNameIdx]) === normalizeText(targetName) &&
+                normalizeDateValue(row[profileBirthdayIdx]) === normalizeDateValue(targetBirthday)) {
+              matchedProfiles.push(index + 2);
+            }
+          });
+          if (matchedProfiles.length > 1) throw new Error("權限資料符合條件的帳號不唯一，未進行修改。");
+          if (matchedProfiles.length === 1) profileRow = matchedProfiles[0];
+        }
+      }
+    }
+
     sheet.getRange(matchedRows[0], fieldIdx + 1).setValue(value);
-    return true;
+    if (profileRow !== -1) {
+      const profileFieldIdx = fieldName === "姓名" ? profileNameIdx : profileBirthdayIdx;
+      profileSheet.getRange(profileRow, profileFieldIdx + 1).setValue(value);
+    }
+    const updatedName = fieldName === "姓名" ? String(value) : String(targetName);
+    const updatedBirthday = fieldName === "生日"
+      ? Utilities.formatDate(value, "GMT+8", "yyyy-MM-dd")
+      : normalizeDateValue(targetBirthday);
+    return {
+      updated: true,
+      currentUserName: isOwnRecord ? updatedName : "",
+      currentUserBirthday: isOwnRecord ? updatedBirthday : ""
+    };
   }
 
   function addEditCommentByName(unit, targetName, fieldName, newValue, requesterName) {
