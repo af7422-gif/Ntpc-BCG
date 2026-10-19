@@ -44,13 +44,25 @@ function isAdminRole(roleValue, unitValue) {
   return ['admin', '管理者', '主管', '系統管理者', '系統管理', 'administrator'].includes(role) || role.includes('admin');
 }
 
-function getUserAccessProfile(searchName, searchBirthday) {
+function isValidTesterSession(testToken) {
+  if (!testToken) return false;
+  return CacheService.getScriptCache().get(`tester:${testToken}`) === '1';
+}
+
+function revokeTesterSession(testToken) {
+  if (testToken) CacheService.getScriptCache().remove(`tester:${testToken}`);
+}
+
+function getUserAccessProfile(searchName, searchBirthday, testToken) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const profileSheet = ss.getSheetByName('權限管理') || ss.getSheetByName('UserAccess') || ss.getSheetByName('使用者權限');
   const staffSheet = ss.getSheetByName('新北市在職清冊');
 
   if (!staffSheet) {
     return { role: 'user', unit: '', canViewAll: false, error: 'SHEET_NOT_FOUND' };
+  }
+  if (isValidTesterSession(testToken)) {
+    return { role: 'admin', unit: '全部單位', canViewAll: true, isTester: true };
   }
 
   const nameKey = normalizeText(searchName);
@@ -122,6 +134,43 @@ function getUserAccessProfile(searchName, searchBirthday) {
   return { role: 'user', unit: '', canViewAll: false, error: 'NOT_FOUND' };
 }
 
+function getTesterLoginProfile(password) {
+  if (String(password || '') !== '1971') {
+    return { error: 'INVALID_TESTER_PASSWORD' };
+  }
+
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('新北市在職清冊');
+  if (!sheet || sheet.getLastRow() < 3) return { error: 'SHEET_NOT_FOUND' };
+
+  const headers = sheet.getRange(2, 1, 1, sheet.getLastColumn()).getValues()[0];
+  const data = sheet.getRange(3, 1, sheet.getLastRow() - 2, headers.length).getValues();
+  const nameIdx = headers.indexOf('姓名');
+  const birthdayIdx = headers.indexOf('生日');
+  const historyIdx = headers.indexOf('歷年指導紀錄');
+  const activeIdx = headers.indexOf('目前是否執行業務');
+  if ([nameIdx, birthdayIdx, historyIdx].includes(-1)) return { error: 'SHEET_NOT_FOUND' };
+
+  const candidates = data.filter(row =>
+    normalizeText(row[nameIdx]) && normalizeDateValue(row[birthdayIdx]) &&
+    String(row[historyIdx] || '').trim() &&
+    (activeIdx === -1 || String(row[activeIdx] || '').trim() !== '否')
+  );
+  if (!candidates.length) return { error: 'NO_TEST_STAFF' };
+
+  const row = candidates[Math.floor(Math.random() * candidates.length)];
+  const testToken = Utilities.getUuid();
+  CacheService.getScriptCache().put(`tester:${testToken}`, '1', 21600);
+  return {
+    role: 'admin',
+    unit: '全部單位',
+    canViewAll: true,
+    isTester: true,
+    testToken,
+    name: String(row[nameIdx]).trim(),
+    birthday: normalizeDateValue(row[birthdayIdx])
+  };
+}
+
 //查詢當年度參訓成績
 function searchAnnualResults(searchName, searchBirthday) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -178,7 +227,9 @@ function searchAnnualResults(searchName, searchBirthday) {
       pass: getValueAndColor("師資統合-是否合格")
     },
     seed: {
-      score: getValueAndColor("種子師資-成績"),
+      written: getValueAndColor("種子師資-筆試"),
+      teaching: getValueAndColor("種子師資-教學評量"),
+      total: getValueAndColor("種子師資-總成績"),
       pass: getValueAndColor("種子師資-是否合格")
     },
     skill: {
@@ -191,8 +242,8 @@ function searchAnnualResults(searchName, searchBirthday) {
   };
 }
 
-function searchData(searchName, searchBirthday) {
-  const access = getUserAccessProfile(searchName, searchBirthday);
+function searchData(searchName, searchBirthday, testToken) {
+  const access = getUserAccessProfile(searchName, searchBirthday, testToken);
   if (access.error) return { error: access.error };
 
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -255,8 +306,8 @@ function searchData(searchName, searchBirthday) {
   return output;
 }
 
-  function getUnitStaffList(searchName, searchBirthday) {
-    const access = getUserAccessProfile(searchName, searchBirthday);
+  function getUnitStaffList(searchName, searchBirthday, testToken) {
+    const access = getUserAccessProfile(searchName, searchBirthday, testToken);
     if (access.error) return { error: access.error };
 
     const ss = SpreadsheetApp.getActive();
@@ -281,17 +332,15 @@ function searchData(searchName, searchBirthday) {
     const unit = String(row[unitIdx] || '').trim();
     const isActive = String(row[activeIdx] || '').trim();
 
-    if (isActive === "否") {
-      return { error: "NOT_ACTIVE" };
-    }
-
     const identityIdx = headers.findIndex(header => ["身分證號", "身分證字號"].includes(header));
     const visibleRows = access.canViewAll
       ? data
-      : data.filter((staffRow, index) =>
-          index === ownRowIndex ||
-          (unit && normalizeUnit(staffRow[unitIdx]) === normalizeUnit(unit))
-        );
+      : isActive === "否"
+        ? [row]
+        : data.filter((staffRow, index) =>
+            index === ownRowIndex ||
+            (unit && normalizeUnit(staffRow[unitIdx]) === normalizeUnit(unit))
+          );
     const result = visibleRows.map(staffRow => {
       const obj = {};
       headers.forEach((header, index) => {
@@ -310,16 +359,16 @@ function searchData(searchName, searchBirthday) {
     return { unit: access.canViewAll ? '全部單位' : unit, list: result, role: access.role, canViewAll: access.canViewAll };
   }
 
-  function updateStaffFieldAsAdmin(editorName, editorBirthday, targetUnit, targetName, targetBirthday, fieldName, newValue) {
-    return updateStaffFieldInternal(editorName, editorBirthday, targetUnit, targetName, targetBirthday, fieldName, newValue, false);
+  function updateStaffFieldAsAdmin(editorName, editorBirthday, targetUnit, targetName, targetBirthday, fieldName, newValue, testToken) {
+    return updateStaffFieldInternal(editorName, editorBirthday, targetUnit, targetName, targetBirthday, fieldName, newValue, false, testToken);
   }
 
-  function updateStaffField(editorName, editorBirthday, targetUnit, targetName, targetBirthday, fieldName, newValue) {
-    return updateStaffFieldInternal(editorName, editorBirthday, targetUnit, targetName, targetBirthday, fieldName, newValue, true);
+  function updateStaffField(editorName, editorBirthday, targetUnit, targetName, targetBirthday, fieldName, newValue, testToken) {
+    return updateStaffFieldInternal(editorName, editorBirthday, targetUnit, targetName, targetBirthday, fieldName, newValue, true, testToken);
   }
 
-  function updateStaffFieldInternal(editorName, editorBirthday, targetUnit, targetName, targetBirthday, fieldName, newValue, allowSelfEdit) {
-    const access = getUserAccessProfile(editorName, editorBirthday);
+  function updateStaffFieldInternal(editorName, editorBirthday, targetUnit, targetName, targetBirthday, fieldName, newValue, allowSelfEdit, testToken) {
+    const access = getUserAccessProfile(editorName, editorBirthday, testToken);
     const selfEditableFields = new Set(["姓名", "生日", "聯絡電話", "E-Mail"]);
     const isOwnRecord = normalizeText(editorName) === normalizeText(targetName) &&
       normalizeDateValue(editorBirthday) === normalizeDateValue(targetBirthday) &&

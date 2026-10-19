@@ -112,6 +112,7 @@
     }
     .primary-button:hover { background: var(--teal-dark); transform: translateY(-1px); }
     .login-submit { width: 100%; margin-top: 10px; }
+    .tester-login-button { width: 100%; margin-top: 8px; }
     .login-message { min-height: 24px; margin: 16px 0 0; color: var(--red); font-size: 13px; }
     .login-note { margin-top: 26px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; line-height: 1.8; }
 
@@ -200,11 +201,13 @@
     .unit-filter { width: min(320px, 35vw); height: 43px; padding: 0 14px; border: 1px solid #dce6e9; border-radius: 8px; outline: 0; background: #fff; color: var(--ink); font-size: 14px; }
     .unit-filter:focus { border-color: var(--teal); }
     .table-wrap { overflow-x: auto; }
+    .table-wrap.is-sticky-header { max-height: min(70vh, 760px); overflow: auto; }
     table { width: 100%; border-collapse: collapse; white-space: nowrap; }
     #staffTable { table-layout: auto; }
     #staffTable th, #staffTable td { white-space: normal; overflow-wrap: anywhere; }
     #staffTable .row-actions, #staffTable .small-action { white-space: nowrap; }
     th { padding: 15px 20px; background: #f7fafb; color: #526a78; text-align: left; font-size: 14px; font-weight: 800; }
+    .is-sticky-header th { position: sticky; z-index: 2; top: 0; border-bottom: 1px solid var(--line); background: #f7fafb; }
     #staffTable th { vertical-align: top; }
     .table-column-header { position: relative; display: flex; min-width: 0; align-items: flex-start; justify-content: space-between; gap: 8px; }
     .table-column-header .sort-button { flex: 1; }
@@ -243,7 +246,22 @@
     .page-note p { margin: 0; }
     .page-note p + p { margin-top: 4px; }
     .notice.warning { border-color: #d7a13c; border-left: 5px solid #bd812d; background: #fff5e7; color: #694914; font-weight: 700; }
+    .application-notice { display: flex; align-items: flex-start; gap: 12px; padding: 17px; font-size: 14px; }
+    .application-notice > i { flex: 0 0 auto; margin-top: 2px; color: #bd812d; font-size: 20px; }
     .annual-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
+    .training-entry-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .training-entry { display: flex; min-width: 0; min-height: 270px; flex-direction: column; gap: 17px; padding: 22px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+    .training-entry.is-recommended { border: 2px solid #168276; box-shadow: none; }
+    .training-entry-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .training-entry-icon { display: grid; width: 62px; height: 62px; flex: 0 0 62px; place-items: center; border-radius: 12px; background: #e5f3f0; color: #087e83; font-size: 29px; }
+    .training-entry:nth-child(2) .training-entry-icon { background: #fff3df; color: #a66a18; }
+    .training-entry:nth-child(3) .training-entry-icon { background: #eaf0f8; color: #436b9c; }
+    .training-status { display: inline-flex; min-height: 29px; align-items: center; padding: 5px 9px; border-radius: 999px; background: #eef2f4; color: #5c7180; font-size: 12px; font-weight: 800; white-space: nowrap; }
+    .training-status.is-recommended { background: #e4f4ed; color: #23734c; }
+    .training-entry h2 { margin: 0; color: var(--ink); font-size: 21px; }
+    .training-entry-description { min-height: 42px; margin: 0; color: var(--muted); font-size: 14px; line-height: 1.7; }
+    .training-entry-button { width: 100%; margin-top: auto; }
+    .training-entry-button:disabled { border: 1px solid #e1e7e9; background: #f4f6f7; color: #81919a; cursor: not-allowed; opacity: 1; }
     .annual-card { padding: 18px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
     .annual-card h3 { margin: 0 0 14px; color: var(--teal-dark); font-size: 17px; }
     .annual-row { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-top: 1px solid #edf2f4; font-size: 15px; }
@@ -298,12 +316,18 @@
     .history-editor-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
     .history-editor-head h3 { margin: 0; color: var(--teal-dark); font-size: 15px; }
     .history-record-list { display: grid; gap: 10px; }
-    .history-edit-row { position: relative; padding: 14px; border: 1px solid #e5ecee; border-radius: 8px; background: #fbfcfd; }
+    .history-edit-row { position: relative; padding: 14px; border: 1px solid #e5ecee; border-radius: 8px; background: #fbfcfd; transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease; }
     .history-edit-row.assistant-record { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 10px; }
     .history-edit-row.trainee-record { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 12px; }
     .history-edit-row .field { margin: 5px 0 9px; }
+    .history-edit-row.assistant-record .field { margin-bottom: 0; }
     .history-edit-row .field label { display: grid; gap: 7px; }
     .history-edit-row .field input { height: 40px; }
+    .history-record-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .history-edit-row.trainee-record .history-record-actions { grid-column: 1 / -1; }
+    .history-record-drag { padding: 8px 10px; border: 1px solid #dce4e7; border-radius: 7px; background: #fff; color: #52636b; cursor: grab; }
+    .history-record-drag:active { cursor: grabbing; }
+    .history-edit-row.is-dragging { border-color: #438985; background: #eaf4f3; box-shadow: 0 5px 16px rgba(21, 92, 96, .16); }
     .history-record-remove { padding: 8px 10px; border: 1px solid #e4caca; border-radius: 7px; background: #fff; color: #9f3d3d; font-size: 12px; font-weight: 700; }
     .history-record-remove:hover { background: #fff5f4; }
     .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
@@ -345,6 +369,7 @@
       .table-tools { width: 100%; }
       .unit-filter { width: 100%; }
       .annual-grid, .detail-grid, .form-grid { grid-template-columns: 1fr; }
+      .training-entry-grid { grid-template-columns: 1fr; }
       .history-grid { grid-template-columns: 1fr; padding: 10px; }
       .history-edit-row.trainee-record { grid-template-columns: 1fr; }
       .modal-backdrop { padding: 10px; }
@@ -383,6 +408,11 @@
           <input id="loginBirthday" name="birthday" type="date" autocomplete="bday" required>
         </div>
         <button id="loginButton" class="primary-button login-submit" type="submit">登入</button>
+        <div class="field tester-login-field">
+          <label for="testerPassword">Super Admin 密碼</label>
+          <input id="testerPassword" type="password" autocomplete="current-password" placeholder="請輸入 Super Admin 密碼">
+        </div>
+        <button id="testerLoginButton" class="outline-button tester-login-button" type="button"><i class="fa-solid fa-user-shield" aria-hidden="true"></i> Super Admin 登入</button>
         <p id="loginMessage" class="login-message" role="status" aria-live="polite"></p>
         <div class="login-note">登入後可查詢個人資料。管理者可依權限查看人員清冊；一般人員可瀏覽同服務單位名冊，身分證號僅本人可查看。</div>
       </form>
@@ -406,8 +436,9 @@
       <aside class="sidebar">
         <nav class="nav-list" aria-label="主要導覽">
           <button id="personalProfileNav" class="nav-button hidden" type="button" data-view="personal"><span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-id-card"></i></span>檢視個人資料</button>
-          <button class="nav-button active" type="button" data-view="overview"><span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-address-book"></i></span>名冊瀏覽及維護</button>
-          <button id="instructorManagementNav" class="nav-button hidden" type="button" data-view="instructors"><span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-chalkboard-user"></i></span>師資管理</button>
+          <button class="nav-button active" type="button" data-view="overview"><span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-address-book"></i></span>名冊瀏覽維護</button>
+          <button id="trainingRegistrationNav" class="nav-button hidden" type="button" data-view="trainingRegistration"><span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-clipboard-list"></i></span>報名年度訓練</button>
+          <button id="instructorManagementNav" class="nav-button hidden" type="button" data-view="instructors"><span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-chalkboard-user"></i></span>師資人員管理</button>
           <button class="nav-button" type="button" data-view="annual"><span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-award"></i></span>年度訓練成績</button>
         </nav>
         <div class="side-help">
@@ -425,9 +456,35 @@
           <div id="personalProfileContent" class="personal-profile"><div class="panel empty-state">正在載入個人資料…</div></div>
         </section>
 
+        <section id="trainingRegistrationView" class="app-view hidden">
+          <div class="page-heading">
+            <div><div class="eyebrow">ANNUAL TRAINING</div><h1>報名年度訓練</h1><p>依個人建議參訓項目查看本年度報名建議。</p></div>
+          </div>
+          <div id="trainingRegistrationGrid" class="training-entry-grid">
+            <article class="training-entry" data-training-key="技術評價">
+              <div class="training-entry-head"><span class="training-entry-icon" aria-hidden="true"><i class="fa-solid fa-chart-column"></i></span><span class="training-status">載入中</span></div>
+              <h2>技術評價</h2>
+              <p class="training-entry-description">正在讀取個人參訓建議。</p>
+              <button class="outline-button training-entry-button" type="button" disabled>報名表單建置中</button>
+            </article>
+            <article class="training-entry" data-training-key="種子師資">
+              <div class="training-entry-head"><span class="training-entry-icon" aria-hidden="true"><i class="fa-solid fa-graduation-cap"></i></span><span class="training-status">載入中</span></div>
+              <h2>種子師資</h2>
+              <p class="training-entry-description">正在讀取個人參訓建議。</p>
+              <button class="outline-button training-entry-button" type="button" disabled>報名表單建置中</button>
+            </article>
+            <article class="training-entry" data-training-key="師資統合">
+              <div class="training-entry-head"><span class="training-entry-icon" aria-hidden="true"><i class="fa-solid fa-globe"></i></span><span class="training-status">載入中</span></div>
+              <h2>師資統合</h2>
+              <p class="training-entry-description">正在讀取個人參訓建議。</p>
+              <button class="outline-button training-entry-button" type="button" disabled>報名表單建置中</button>
+            </article>
+          </div>
+        </section>
+
         <section id="overviewView" class="app-view">
           <div class="page-heading">
-            <div><div class="eyebrow">STAFF DIRECTORY</div><h1>名冊瀏覽及維護</h1></div>
+            <div><div class="eyebrow">STAFF DIRECTORY</div><h1>名冊瀏覽維護</h1></div>
             <div class="heading-actions">
               <button id="addStaffButton" class="primary-button" type="button"><i class="fa-solid fa-user-plus" aria-hidden="true"></i> 新增工作人員申請</button>
               <button id="exportButton" class="outline-button" type="button"><i class="fa-solid fa-file-export" aria-hidden="true"></i> 匯出 Excel</button>
@@ -449,7 +506,7 @@
               <div><h2>工作人員資料清冊</h2><p id="directoryFilterStatus" aria-live="polite">點擊上方圖卡篩選符合條件的人員。</p></div>
               <div class="table-tools"><select id="directoryUnitFilter" class="unit-filter" aria-label="依服務單位篩選"><option value="">全部服務單位</option></select></div>
             </div>
-            <div class="table-wrap">
+            <div class="table-wrap is-sticky-header">
               <table id="staffTable">
                 <thead id="staffTableHead"></thead>
                 <tbody id="staffTableBody"></tbody>
@@ -460,13 +517,13 @@
 
         <section id="instructorsView" class="app-view hidden">
           <div class="page-heading">
-            <div><div class="eyebrow">INSTRUCTOR MANAGEMENT</div><h1>師資管理</h1><p>檢視在職且符合師資資格的人員及歷年協助局端初訓紀錄。</p></div>
+            <div><div class="eyebrow">INSTRUCTOR MANAGEMENT</div><h1>師資人員管理</h1><p>檢視在職且符合師資資格的人員及歷年協助局端初訓紀錄。</p></div>
           </div>
           <section class="panel">
             <div class="panel-head">
               <div><h2>在職師資</h2><p id="instructorManagementStatus" aria-live="polite">載入中…</p></div>
             </div>
-            <div class="table-wrap">
+            <div class="table-wrap is-sticky-header">
               <table id="instructorTable">
                 <thead id="instructorTableHead"></thead>
                 <tbody id="instructorTableBody"></tbody>
@@ -499,6 +556,7 @@
         user: null,
         profile: null,
         staff: [],
+        directoryLoaded: false,
         directoryFilter: '',
         columnFilters: {},
         annualResults: null,
@@ -531,11 +589,15 @@
         const button = $('#loginButton');
         button.disabled = busy;
         button.textContent = busy ? '驗證中…' : '登入';
+        const testerButton = $('#testerLoginButton');
+        testerButton.disabled = busy;
+        testerButton.innerHTML = busy ? '驗證中…' : '<i class="fa-solid fa-user-shield" aria-hidden="true"></i> Super Admin 登入';
         $('#loginMessage').textContent = busy ? '正在驗證資料，請稍候。' : '';
       }
 
       function setView(view) {
         if (view === 'instructors' && !isAdmin()) return;
+        if (view === 'trainingRegistration' && isAdmin() && !state.profile.isTester) return;
         state.currentView = view;
         document.querySelectorAll('.app-view').forEach(section => section.classList.add('hidden'));
         const section = $(`#${view}View`);
@@ -544,6 +606,7 @@
           button.classList.toggle('active', button.dataset.view === view);
         });
         if (view === 'personal') renderPersonalProfile();
+        if (view === 'trainingRegistration') renderTrainingRegistration();
         if (view === 'instructors') renderInstructorManagement();
         if (view === 'annual') loadAnnualResults();
       }
@@ -552,22 +615,51 @@
         state.profile = profile;
         state.directoryFilter = '';
         state.columnFilters = {};
+        state.directoryLoaded = false;
         state.user = { name, birthday, unit: profile.unit || '' };
         state.annualResults = null;
         state.annualResultsLoaded = false;
         $('#loginScreen').classList.add('hidden');
         $('#appShell').classList.remove('hidden');
-        $('#roleTag').textContent = isAdmin() ? '管理者' : '一般人員';
-        $('#userNameLabel').textContent = name;
-        $('#userUnitLabel').textContent = state.user.unit || (isAdmin() ? '全部單位' : '服務單位未設定');
+        $('#roleTag').textContent = profile.isTester ? 'Super Admin' : (isAdmin() ? '管理者' : '一般人員');
+        $('#userNameLabel').textContent = profile.isTester ? 'Super Admin' : name;
+        $('#userUnitLabel').textContent = profile.isTester
+          ? `範例資料：${name}`
+          : (state.user.unit || (isAdmin() ? '全部單位' : '服務單位未設定'));
         $('#userAvatar').textContent = name.charAt(0) || '用';
         $('#directoryUnitFilter').classList.toggle('hidden', !isAdmin());
         $('#exportButton').classList.remove('hidden');
         $('#addStaffButton').classList.toggle('hidden', !isAdmin());
-        $('#personalProfileNav').classList.toggle('hidden', isAdmin());
+        $('#personalProfileNav').classList.toggle('hidden', isAdmin() && !profile.isTester);
+        $('#trainingRegistrationNav').classList.toggle('hidden', isAdmin() && !profile.isTester);
         $('#instructorManagementNav').classList.toggle('hidden', !isAdmin());
         setView(isAdmin() ? 'overview' : 'personal');
         loadDirectory();
+      }
+
+      function loginAsTester(password) {
+        $('#loginMessage').textContent = '';
+        setLoginBusy(true);
+        google.script.run
+          .withSuccessHandler(profile => {
+            setLoginBusy(false);
+            if (!profile || profile.error) {
+              const messages = {
+                INVALID_TESTER_PASSWORD: 'Super Admin 密碼錯誤。',
+                NO_TEST_STAFF: '目前沒有歷年指導紀錄可供測試的工作人員。',
+                SHEET_NOT_FOUND: '系統資料表或必要欄位不存在，請聯絡系統管理人員。'
+              };
+              $('#loginMessage').textContent = messages[profile && profile.error] || 'Super Admin 登入失敗。';
+              return;
+            }
+            $('#testerPassword').value = '';
+            enterApp(profile, profile.name, profile.birthday);
+          })
+          .withFailureHandler(error => {
+            setLoginBusy(false);
+            $('#loginMessage').textContent = `登入發生錯誤：${error && error.message ? error.message : error}`;
+          })
+          .getTesterLoginProfile(password);
       }
 
       function login(name, birthday) {
@@ -662,21 +754,27 @@
           .withSuccessHandler(response => {
             if (!response || response.error) {
               state.staff = [];
+              state.directoryLoaded = true;
               renderDirectoryError(response && response.error);
+              if (state.currentView === 'trainingRegistration') renderTrainingRegistration();
               return;
             }
             state.staff = Array.isArray(response.list) ? response.list.map(normalizeRow) : [];
+            state.directoryLoaded = true;
             if (response.unit) state.user.unit = response.unit === '全部單位' ? state.profile.unit : response.unit;
-            $('#userUnitLabel').textContent = isAdmin()
-              ? state.profile.unit || '全部單位'
-              : state.user.unit || '服務單位未設定';
+            $('#userUnitLabel').textContent = state.profile.isTester
+              ? `範例資料：${state.user.name}`
+              : (isAdmin() ? state.profile.unit || '全部單位' : state.user.unit || '服務單位未設定');
             renderDirectory();
+            if (state.currentView === 'trainingRegistration') renderTrainingRegistration();
           })
           .withFailureHandler(error => {
             state.staff = [];
+            state.directoryLoaded = true;
             renderDirectoryError(error && error.message ? error.message : error);
+            if (state.currentView === 'trainingRegistration') renderTrainingRegistration();
           })
-          .getUnitStaffList(state.user.name, state.user.birthday);
+          .getUnitStaffList(state.user.name, state.user.birthday, state.profile.testToken || '');
       }
 
       function renderDirectoryError(error) {
@@ -1146,7 +1244,8 @@
             ['技術評價獲證年度', '技術評價獲證年度'],
             ['種子師資獲證年度', '種子師資獲證年度'],
             ['師資統合獲證年度', '師資統合獲證年度'],
-            ['最近一次帶初訓日', '最近一次帶初訓日']
+            ['最近一次帶初訓日', '最近一次帶初訓日'],
+            ['參加下屆師統資格', '參加下屆師統資格']
           ]],
           ['執業資料', [
             ['目前是否執行業務', '目前是否執行業務'],
@@ -1187,6 +1286,42 @@
         content.innerHTML = buildStaffDetailsContent(row, true);
       }
 
+      function renderTrainingRegistration() {
+        const cards = $('#trainingRegistrationGrid').querySelectorAll('[data-training-key]');
+        if (!state.directoryLoaded) {
+          cards.forEach(card => {
+            $('.training-status', card).textContent = '載入中';
+            $('.training-entry-description', card).textContent = '正在讀取個人參訓建議。';
+          });
+          return;
+        }
+
+        const row = state.staff.find(staffRow =>
+          String(staffRow['姓名'] || '').trim() === state.user.name &&
+          String(staffRow['生日'] || '').trim() === state.user.birthday
+        );
+        if (!row) {
+          cards.forEach(card => {
+            $('.training-status', card).textContent = '無法判斷';
+            $('.training-status', card).classList.remove('is-recommended');
+            $('.training-entry-description', card).textContent = '目前無法讀取個人建議參訓項目。';
+            card.classList.remove('is-recommended');
+          });
+          return;
+        }
+
+        const recommendations = String(row['建議參訓項目'] || '');
+        cards.forEach(card => {
+          const isRecommended = recommendations.includes(card.dataset.trainingKey);
+          $('.training-status', card).textContent = isRecommended ? '建議報名' : '未列入建議';
+          $('.training-status', card).classList.toggle('is-recommended', isRecommended);
+          $('.training-entry-description', card).textContent = isRecommended
+            ? '已列入您的建議參訓項目。'
+            : '目前未列入您的建議參訓項目。';
+          card.classList.toggle('is-recommended', isRecommended);
+        });
+      }
+
       function showDetails(row) {
         const footer = '<button class="outline-button" type="button" data-dismiss="true">關閉</button>';
         openModal(`${row['姓名'] || '工作人員'}｜資料明細`, buildStaffDetailsContent(row), footer, false, 'details-modal');
@@ -1223,7 +1358,7 @@
             }
             const sections = [
               ['師資統合訓練', [['判讀成績', result.master && result.master.read], ['皮內注射技術成績', result.master && result.master.inject], ['是否合格', result.master && result.master.pass]]],
-              ['種子師資訓練', [['成績', result.seed && result.seed.score], ['是否合格', result.seed && result.seed.pass]]],
+              ['種子師資訓練', [['筆試', result.seed && result.seed.written], ['教學評量', result.seed && result.seed.teaching], ['總成績', result.seed && result.seed.total], ['是否合格', result.seed && result.seed.pass]]],
               ['技術評價', [['判讀成績', result.skill && result.skill.read], ['判讀補考成績', result.skill && result.skill.readMakeup], ['皮內注射技術成績', result.skill && result.skill.inject], ['皮內注射補考成績', result.skill && result.skill.injectMakeup], ['是否合格', result.skill && result.skill.pass]]]
             ];
             content.innerHTML = sections.map(([title, rows]) =>
@@ -1237,7 +1372,7 @@
       function buildHistoryAssistantFormRow(record = {}) {
         return `<div class="history-edit-row assistant-record" data-history-record="assistant">
           <div class="field"><label>年度<input type="number" min="0" step="1" data-history-field="year" value="${escapeHtml(record.year)}" required></label></div>
-          <button class="history-record-remove" type="button" data-history-action="remove">刪除此筆</button>
+          <div class="history-record-actions"><button class="history-record-drag" type="button" draggable="true" data-history-drag-handle title="拖曳排序" aria-label="拖曳排序"><i class="fa-solid fa-grip" aria-hidden="true"></i></button><button class="history-record-remove" type="button" data-history-action="remove">刪除此筆</button></div>
         </div>`;
       }
 
@@ -1252,7 +1387,7 @@
         ];
         return `<div class="history-edit-row trainee-record" data-history-record="trainee">${fields.map(([label, key, type]) =>
           `<div class="field"><label>${escapeHtml(label)}<input type="${type}" ${type === 'number' ? 'min="0" step="1"' : ''} data-history-field="${key}" value="${escapeHtml(record[key])}" required></label></div>`
-        ).join('')}<button class="history-record-remove" type="button" data-history-action="remove">刪除此筆</button></div>`;
+        ).join('')}<div class="history-record-actions"><button class="history-record-drag" type="button" draggable="true" data-history-drag-handle title="拖曳排序" aria-label="拖曳排序"><i class="fa-solid fa-grip" aria-hidden="true"></i></button><button class="history-record-remove" type="button" data-history-action="remove">刪除此筆</button></div></div>`;
       }
 
       function requestMentorshipHistoryEdit(row) {
@@ -1281,6 +1416,49 @@
         const footer = '<button class="outline-button" type="button" data-dismiss="true">取消</button><button id="saveHistoryButton" class="primary-button" type="button">儲存紀錄</button>';
         openModal('編輯歷年指導紀錄', content, footer, true);
         const form = $('#historyEditForm');
+        let draggedRecord = null;
+        form.addEventListener('dragstart', event => {
+          const handle = event.target.closest('[data-history-drag-handle]');
+          if (!handle) {
+            event.preventDefault();
+            return;
+          }
+          draggedRecord = handle.closest('[data-history-record]');
+          draggedRecord.classList.add('is-dragging');
+          event.dataTransfer.effectAllowed = 'move';
+          event.dataTransfer.setData('text/plain', 'history-record');
+        });
+        form.addEventListener('dragover', event => {
+          const targetRecord = event.target.closest('[data-history-record]');
+          if (!draggedRecord || !targetRecord || targetRecord.parentElement !== draggedRecord.parentElement) return;
+          if (targetRecord === draggedRecord) return;
+          event.preventDefault();
+          const bounds = targetRecord.getBoundingClientRect();
+          const insertAfter = event.clientY > bounds.top + bounds.height / 2;
+          const list = targetRecord.parentElement;
+          const insertBefore = insertAfter ? targetRecord.nextElementSibling : targetRecord;
+          if (insertBefore === draggedRecord) return;
+          const records = [...list.children];
+          records.forEach(record => record.getAnimations().forEach(animation => animation.cancel()));
+          const previousPositions = new Map(records.map(record => [record, record.getBoundingClientRect()]));
+          list.insertBefore(draggedRecord, insertBefore);
+          previousPositions.forEach((previousBounds, record) => {
+            if (record === draggedRecord) return;
+            const nextBounds = record.getBoundingClientRect();
+            const offsetX = previousBounds.left - nextBounds.left;
+            const offsetY = previousBounds.top - nextBounds.top;
+            if (offsetX || offsetY) {
+              record.animate([
+                { transform: `translate(${offsetX}px, ${offsetY}px)` },
+                { transform: 'translate(0, 0)' }
+              ], { duration: 160, easing: 'ease-out' });
+            }
+          });
+        });
+        form.addEventListener('dragend', () => {
+          if (draggedRecord) draggedRecord.classList.remove('is-dragging');
+          draggedRecord = null;
+        });
         form.addEventListener('click', event => {
           const action = event.target.closest('[data-history-action]');
           if (!action) return;
@@ -1325,7 +1503,8 @@
               notify(`更新失敗：${error && error.message ? error.message : error}`, true);
             })
             .updateStaffFieldAsAdmin(
-              state.user.name, state.user.birthday, row['服務單位'], row['姓名'], row['生日'], '歷年指導紀錄', value
+              state.user.name, state.user.birthday, row['服務單位'], row['姓名'], row['生日'], '歷年指導紀錄', value,
+              state.profile.testToken || ''
             );
         });
       }
@@ -1410,7 +1589,8 @@
             });
           if (adminEdit) {
             runner.updateStaffFieldAsAdmin(
-              state.user.name, state.user.birthday, row['服務單位'], row['姓名'], row['生日'], field, value
+              state.user.name, state.user.birthday, row['服務單位'], row['姓名'], row['生日'], field, value,
+              state.profile.testToken || ''
             );
           } else if (selfDirectEdit) {
             runner.updateStaffField(
@@ -1430,7 +1610,7 @@
           ['初訓獲證年度', 'add_basic_year', 'number'], ['目前是否執行業務', 'add_active', 'select'],
           ['未執行業務原因', 'add_reason', 'text']
         ];
-        const content = `<div class="notice">當年度初訓合格者由局端匯入，無須另外申請。</div><div class="form-grid">${fields.map(([label, id, type]) => {
+        const content = `<div class="notice warning application-notice" role="note"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i><div><strong>申請提醒</strong><br>當年度初訓合格者由局端匯入，無須另外申請。</div></div><div class="form-grid">${fields.map(([label, id, type]) => {
           if (type === 'select') return `<div class="field"><label for="${id}">${label}</label><select id="${id}"><option value="是">是</option><option value="否">否</option></select></div>`;
           const value = id === 'add_unit' ? state.user.unit : '';
           return `<div class="field"><label for="${id}">${label}</label><input id="${id}" type="${type}" value="${escapeHtml(value)}" ${id === 'add_unit' ? 'readonly' : ''} ${['add_name', 'add_birthday'].includes(id) ? 'required' : ''}></div>`;
@@ -1522,6 +1702,14 @@
           return;
         }
         login(name, birthday);
+      });
+      $('#testerLoginButton').addEventListener('click', () => {
+        const password = $('#testerPassword').value;
+        if (!password) {
+          $('#loginMessage').textContent = '請輸入 Super Admin 密碼。';
+          return;
+        }
+        loginAsTester(password);
       });
 
       document.querySelectorAll('.nav-button').forEach(button => {
@@ -1645,6 +1833,9 @@
         if (event.key === 'Escape' && $('#modalRoot').querySelector('.modal-backdrop')) closeTopModal();
       });
       $('#logoutButton').addEventListener('click', () => {
+        if (state.profile && state.profile.testToken) {
+          google.script.run.revokeTesterSession(state.profile.testToken);
+        }
         state.user = null;
         state.profile = null;
         state.staff = [];
